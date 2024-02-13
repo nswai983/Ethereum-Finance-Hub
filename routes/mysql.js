@@ -8,9 +8,12 @@
 
     https://www.freecodecamp.org/news/javascript-modules-explained-with-examples/
 
+    Use of mysql2 package vs mysql came from an authentication issue with mysql package. Issue resolved via this article:
+    https://github.com/strapi/strapi/issues/13774
+
 */
 
-var mysql = require('mysql');
+var mysql = require('mysql2');
 
 // var con = mysql.createConnection({
 //   MYSQLDATABASE:        "railway",
@@ -22,20 +25,21 @@ var mysql = require('mysql');
 //   MYSQL_ROOT_PASSWORD:  "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E"
 // });
 
-let con = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@roundhouse.proxy.rlwy.net:46480/railway`);
+let db = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@roundhouse.proxy.rlwy.net:46480/railway`);
 
-con.connect(function(err) {
-  if (err) throw err;
-  console.log("Connected!");
-});
+// con.connect(function(err) {
+//   if (err) throw err;
+//   console.log("Connected!");
+// });
 
 
-function getWalletBalance(err, wallet) {
-  if (err) throw err;
+function getWalletBalance(wallet) {
 
   sql = "SELECT SUM(value) FROM walletBalances WHERE wallet = " + wallet;
 
-  console.log("Connected!");
+  console.log(sql);
+
+  return con.query(sql);
 };
 
 /*
@@ -122,5 +126,6 @@ function getWalletBalance(err, wallet) {
 
 */
 
+
 // Export router so that it can be used by app.js
-module.exports = mysql;
+module.exports = db;

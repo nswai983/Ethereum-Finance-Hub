@@ -1,11 +1,11 @@
 <h1>Ethereum Finance Hub</h1>
 <p>Wallets view</p>
 
-<p>Total value: $2,750.25</p>
+<p>Total value: {{walletValue}}</p>
 
 <label for="wallets">Filter by: </label>
 <select name="wallets" id="wallets">
-    {{#each wallet}}
+    {{#each wallets}}
     <option value={{this}} >{{this}}</option>
     {{/each}}
 </select>

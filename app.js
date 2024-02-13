@@ -22,6 +22,9 @@
 
 let express = require("express");
 let index = require("./routes/index");
+let db = require("./routes/mysql");
+let cookieParser = require('cookie-parser');
+let bodyParser = require('body-parser');
 
 // Initialize app
 let app = express();
@@ -44,6 +47,8 @@ app.engine('handlebars', handlebars.engine({
 }));
 
 app.use(express.static('public'));
+app.use(cookieParser());
+app.use(bodyParser.urlencoded({extended: false}));
 
 // Set port
 let port = 27612
@@ -53,9 +58,20 @@ let port = 27612
 
 app.use("/", index);
 
-// app.get('/', (req, res) => {
-//     res.render('main', {layout: 'index'})
-// });
+//connect to database once app is started
+db.connect(function(err) {
+    if (err) throw err;
+    console.log("Connected to mysql database!");
+  });
+
+  //make the connection global
+  global.db = db;
+  
+  
+  //to keep the connection alive, make frequent quries to SQL database
+  setInterval(function () {
+    db.query('SELECT 1');
+  }, 5000);
 
 // Listen for web traffic
 app.listen(port, function () {

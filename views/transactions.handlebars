@@ -16,20 +16,18 @@
             <label for="token">Token: </label>
             <select name="token" id="token">
                 <option value="all">All</option>
-                <option value="token1">ETH</option>
-                <option value="token2">USDC</option>
-                <option value="token3">FTM</option>
-                <option value="token4">USDT</option>
+                {{#each tokens}}
+                <option value={{this}} >{{this}}</option>
+                {{/each}}
             </select>
         </td>
         <td style="padding: 5px">
             <label for="date">Date: </label>
             <select name="date" id="date">
                 <option value="all">All</option>
-                <option value="date1">Date1</option>
-                <option value="date2">Date2</option>
-                <option value="date3">Date3</option>
-                <option value="date4">Date4</option>
+                {{#each dates}}
+                <option value={{this}} >{{this}}</option>
+                {{/each}}
             </select>
         </td>
         <td style="padding: 5px">
@@ -60,16 +58,20 @@
         <th style="border:1px solid black; text-align:left">from</th>
         <th style="border:1px solid black; text-align:left">to</th>
     </tr>
-    <tr style="border:1px solid black; text-align:left"> 
-        <td style="border:1px solid black; text-align:left">wallet1</td>
-        <td style="border:1px solid black; text-align:left">dfg987dg876erwtun4wpiohfgsdfb</td>
-        <td style="border:1px solid black; text-align:left">12/31/2023</td>
-        <td style="border:1px solid black; text-align:left">USDC</td>
-        <td style="border:1px solid black; text-align:left">1,000</td>
-        <td style="border:1px solid black; text-align:left">$1,000.00</td>
-        <td style="border:1px solid black; text-align:left">987sfdb0987sdf098b7</td>
-        <td style="border:1px solid black; text-align:left">sdfogiusd9f78b8s97df7b2</td>
+    {{#each transactions}}
+                
+    <tr style="border:1px solid black; text-align:left">
+        
+        <td style="border:1px solid black; text-align:left">{{this.walletHash}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.tsxHash}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.date}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.tokenName}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.amount}}</td>
+        <td style="border:1px solid black; text-align:left">${{this.value}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.from}}</td>
+        <td style="border:1px solid black; text-align:left">{{this.to}}</td>
     </tr>
+    {{/each}}
 </table>
 
 <br>
