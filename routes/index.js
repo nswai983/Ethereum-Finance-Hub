@@ -46,14 +46,11 @@ router.get("/", function(req, res) {
 // Summary page route
 router.post("/summary", function(req, res) {
 
+    // Collect wallet data
+    let walletData = req.body.wallets;
     let walletArray = req.cookies["walletData"];
 
     if (walletArray === undefined) {
-
-        // Collect wallet data
-        let walletData = req.body.wallets;
-        let walletArray = [];
-
         // Check wallet data; throw error if issues found
 
         // Get array of wallets
