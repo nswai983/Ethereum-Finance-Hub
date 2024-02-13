@@ -46,52 +46,59 @@ router.get("/", function(req, res) {
 // Summary page route
 router.post("/summary", function(req, res) {
 
-    // Collect wallet data
-    let walletData = req.body.wallets;
-    let walletArray = [];
+    let walletArray = req.cookies["walletData"];
 
-    // Check wallet data; throw error if issues found
+    if (walletArray === undefined) {
 
-    // Get array of wallets
-    let index = 0;
-    let arrayIndex = 0;
-    let substring = "";
-    for (let i = 0; i < walletData.length; i++) {
-        if (i == walletData.length - 1) {
-            substring = walletData.substring(index);
+        // Collect wallet data
+        let walletData = req.body.wallets;
+        let walletArray = [];
 
-            if (substring === "") {
-                continue;
-            } else {
-                walletArray[arrayIndex] = substring
-                arrayIndex++;
+        // Check wallet data; throw error if issues found
 
-                if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
-                    //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
-                    res.redirect('../');
-                    return;
+        // Get array of wallets
+        let index = 0;
+        let arrayIndex = 0;
+        let substring = "";
+        for (let i = 0; i < walletData.length; i++) {
+            if (i == walletData.length - 1) {
+                substring = walletData.substring(index);
+
+                if (substring === "") {
+                    continue;
+                } else {
+                    walletArray[arrayIndex] = substring
+                    arrayIndex++;
+
+                    if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
+                        //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
+                        res.redirect('../');
+                        return;
+                    }
                 }
-            }
 
-        } else if (walletData.charCodeAt(i) == 13) {
+            } else if (walletData.charCodeAt(i) == 13) {
 
-            substring = walletData.substring(index, i);
+                substring = walletData.substring(index, i);
 
-            if (substring === "") {
-                index = i + 2;
-                continue;
-            } else {
-                walletArray[arrayIndex] = substring;
-                index = i + 2;
-                arrayIndex++;
+                if (substring === "") {
+                    index = i + 2;
+                    continue;
+                } else {
+                    walletArray[arrayIndex] = substring;
+                    index = i + 2;
+                    arrayIndex++;
 
-                if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
-                    //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
-                    res.redirect('../');
-                    return;
+                    if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
+                        //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
+                        res.redirect('../');
+                        return;
+                    }
                 }
             }
         }
+        // Set up cookie of wallet data
+        res.cookie("walletData", walletArray);
     }
 
     // console.log(walletData);
@@ -103,8 +110,7 @@ router.post("/summary", function(req, res) {
 
     // Display summary page with relevant data
 
-    // Set up cookie of wallet data
-    res.cookie("walletData", walletArray);
+
 
     // let query = fs.readFileSync(path.join(__dirname, '../queries/walletBalances.sql')).toString();
 
@@ -165,7 +171,7 @@ router.post("/transactions", function(req, res) {
     // Collect wallet data
     let walletArray = req.cookies["walletData"]
     let tokens = ["ETH", "USDC", "BTC"];
-    let dates = ["date1", "date2", "date3", "date4"]
+    let dates = ["2/12/2024"]
 
     // Check wallet data; throw error if issues found
 
@@ -174,14 +180,40 @@ router.post("/transactions", function(req, res) {
     // Get pricing data from CrypoCompare API
 
     // Display summary page with relevant data
-
     
-    let query = "SELECT * FROM TransactionLines INNER JOIN Transactions on TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet WHERE walletHash in("
-    for (let i = 0; i < walletArray.length; i++) {
-        query = query + "'" + walletArray[i] + "', "
+    let query = "SELECT * FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet"
+    
+
+    if (req.body.tsxHashSearch_filter !== undefined && req.body.tsxHashSearch_filter !== "Search Transactions..." && req.body.tsxHashSearch_filter !== "") {
+        query = query + " WHERE tsxHash = '" + req.body.tsxHashSearch_filter + "'"
+    } else {
+
+        // Add wallet filters in where clause
+        if (req.body.wallet_filter === "all" || req.body.wallet_filter === undefined) {
+            query = query + " WHERE walletHash in("
+            for (let i = 0; i < walletArray.length; i++) {
+                query = query + "'" + walletArray[i] + "', "
+            }
+            query = query.substring(0, query.length - 2) + ")";
+        } else {
+            query = query + " WHERE walletHash = '" + req.body.wallet_filter + "'"
+        }
+
+        // Add Token filters
+        if (req.body.token_filter !== "all" && req.body.token_filter !== undefined && req.body.token_filter !== "") {
+            query = query + " AND tokenName = '" + req.body.token_filter + "'"
+        }
+
+        // Add Date Filter
+        if (req.body.date_filter !== "all" && req.body.date_filter !== undefined && req.body.date_filter !== "") {
+            query = query + " AND date = '" + req.body.date_filter + "'"
+        }
     }
-    query = query.substring(0, query.length - 2) + ");"
+
+    // Add semicolon to end
+    query = query + ";";
     console.log(query);
+    
 
     db.query(query, (err, result) => {
         if (err) {

@@ -1,11 +1,12 @@
 <h1>Ethereum Finance Hub</h1>
 <p>Transactions View</p>
 
+<form>
 <table>
     <tr>
         <td style="padding: 5px">
-            <label for="wallets">Wallet: </label>
-            <select name="wallets" id="wallets">
+            <label for="wallet_filter">Wallet: </label>
+            <select name="wallet_filter" id="wallet_filter">
                 <option value="all">All</option>
                 {{#each wallets}}
                 <option value={{this}} >{{this}}</option>
@@ -13,8 +14,8 @@
             </select>
         </td>
         <td style="padding: 5px">
-            <label for="token">Token: </label>
-            <select name="token" id="token">
+            <label for="token_filter">Token: </label>
+            <select name="token_filter" id="token_filter">
                 <option value="all">All</option>
                 {{#each tokens}}
                 <option value={{this}} >{{this}}</option>
@@ -22,8 +23,8 @@
             </select>
         </td>
         <td style="padding: 5px">
-            <label for="date">Date: </label>
-            <select name="date" id="date">
+            <label for="date_filter">Date: </label>
+            <select name="date_filter" id="date_filter">
                 <option value="all">All</option>
                 {{#each dates}}
                 <option value={{this}} >{{this}}</option>
@@ -31,12 +32,12 @@
             </select>
         </td>
         <td style="padding: 5px">
-            <label for="tsxHash">Transaction Hash: </label>
+            <label for="tsxHash_filter">Transaction Hash: </label>
         </td>
         <td>
             <search>
                 <form>
-                    <input name="tsxHashSearch" id="tsxHashSearch" placeholder="Search Transactions...">
+                    <input name="tsxHashSearch_filter" id="tsxHashSearch_filter" placeholder="Search Transactions...">
                 </form>
             </search>
             </select>
@@ -77,7 +78,7 @@
 <br>
 <br>
 
-<form>
+
     <button type="submit" formaction="/transactions" formmethod="post">Refresh</button>
     <br>
     <br>
