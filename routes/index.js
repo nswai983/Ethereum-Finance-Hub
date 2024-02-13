@@ -54,6 +54,7 @@ router.post("/summary", function(req, res) {
         // Check wallet data; throw error if issues found
 
         // Get array of wallets
+        walletArray = [];
         let index = 0;
         let arrayIndex = 0;
         let substring = "";
