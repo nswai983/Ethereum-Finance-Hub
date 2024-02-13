@@ -1,0 +1,21 @@
+<h1>Ethereum Finance Hub</h1>
+<p>Wallets view</p>
+
+<p>Total value: $2,750.25</p>
+
+<label for="wallets">Filter by: </label>
+<select name="wallets" id="wallets">
+    {{#each wallet}}
+    <option value={{this}} >{{this}}</option>
+    {{/each}}
+</select>
+
+<br>
+<br>
+
+<form>
+<button type="submit" formaction="/transactions" formmethod="post">See Transactions</button>
+    <br>
+    <br>
+<button type="submit" formaction="/summary" formmethod="post">See Summary</button>
+</form>

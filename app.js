@@ -13,7 +13,10 @@
         * For troubleshooting foreign key duplicate naming issue, the following resource was used:
           https://stackoverflow.com/questions/12994919/errno-121-duplicate-key-on-write-or-update
 
-        
+    The following resources were used to integrate Handlebars into the Node.js application
+    
+        * https://waelyasmina.medium.com/a-guide-into-using-handlebars-with-your-express-js-application-22b944443b65
+        * https://www.youtube.com/watch?v=HxJzZ7fmUDQ
 
 */
 
@@ -24,13 +27,35 @@ let index = require("./routes/index");
 let app = express();
 
 // Set view engine to pug
-app.set('view engine', 'pug');
+// app.set('view engine', 'pug');
+
+// The following code is taken from the Medium article on Handlebars
+
+//Loads the handlebars module
+let handlebars = require('express-handlebars');
+
+//Sets our app to use the handlebars engine
+app.set('view engine', 'handlebars');
+
+
+//Sets handlebars configurations (we will go through them later on)
+app.engine('handlebars', handlebars.engine({
+    layoutsDir: `${__dirname}/views/layouts`
+}));
+
+app.use(express.static('public'));
 
 // Set port
 let port = 27612
 
 // Use index.js routing file
+// app.use("/", index);
+
 app.use("/", index);
+
+// app.get('/', (req, res) => {
+//     res.render('main', {layout: 'index'})
+// });
 
 // Listen for web traffic
 app.listen(port, function () {
