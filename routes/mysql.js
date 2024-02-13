@@ -12,15 +12,15 @@
 
 var mysql = require('mysql');
 
-// var con = mysql.createConnection({
-//   host: "cs469project.railway.internal",
-//   user: "root",
-//   port: 46480,
-//   password: "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E",
-//   database: "railway"
-// });
+var con = mysql.createConnection({
+  MYSQLHOST: "cs469project.railway.internal",
+  MYSQLUSER: "root",
+  MYSQLPORT: 46480,
+  MYSQLPASSWORD: "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E",
+  MYSQL_DATABASE: "railway"
+});
 
-let con = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@mysql.railway.internal:3306/railway`);
+// let con = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@mysql.railway.internal:3306/railway`);
 
 con.connect(function(err) {
   if (err) throw err;
