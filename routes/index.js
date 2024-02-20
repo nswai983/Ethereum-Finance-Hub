@@ -26,8 +26,9 @@ let express = require("express");
 let router = express.Router();
 const path = require('path');
 const fs = require('fs');
-let db = require("./mysql");
+let queries = require("./queries");
 let cookieParser = require('cookie-parser'); 
+let etherscan = require("./etherscan");
 
 // let handlebars = require("handlebars");
 
@@ -44,7 +45,7 @@ router.get("/", function(req, res) {
 });
 
 // Summary page route
-router.post("/summary", function(req, res) {
+router.post("/summary", async function(req, res) {
 
     // Collect wallet data
     let walletData = req.body.wallets;
@@ -102,7 +103,74 @@ router.post("/summary", function(req, res) {
     // console.log(walletData);
     // console.log(walletArray);
 
+
+    // Get list of wallets in database
+    databaseWallets = await queries.getWallets();
+
     // Request wallet balance data from Etherscan API
+    for (let i = 0; i < walletArray.length; i++) {
+
+        // Check if wallet is in database
+        walletFound = false;
+        for (let j = 0; j < databaseWallets.length; j++) {
+            if (walletArray[i] === databaseWallets[j]["walletHash"]) {
+                walletFound = true
+            }
+        }
+
+        // Add wallet to database if not found
+        if (!walletFound) {
+            // Add wallets to database
+            await queries.addWallet(walletArray[i]);
+        }
+        
+
+        
+        // ethereumBalance = await etherscan.getAccountEthereumBalance(walletArray[i]);
+
+        // Get normal transactions for wallet
+
+        let pageNum = 1;
+        let pagesRemaining = true;
+        let normalTsx = [];
+
+        while (pagesRemaining) {
+
+            // Get new transactions
+            let newTsx = await etherscan.getAccountNormalTransactions(walletArray[i], pageNum);
+
+            // Add new transactions to array
+            normalTsx = normalTsx.concat(newTsx);
+
+            // See if we have reached the end of the transactions. If not, add 1 to page number
+            if (newTsx.length < 1000) {
+                pagesRemaining = false
+            } else {
+                pageNum++;
+            }
+
+        }
+
+        // Add each normal transaction to the database
+        for (let i = 0; i < normalTsx.length; i++) {
+            await queries.insertTransaction(normalTsx[i].hash, normalTsx[i].timeStamp, normalTsx[i].to, normalTsx[i].from, normalTsx[i].gasUsed, walletArray[i])
+        }
+
+        // internalTsx = await etherscan.getAccountInternalTransactions(walletArray[i]);
+        // erc20Tsx = await etherscan.getAccountERC20Transactions(walletArray[i]);
+        // erc721Tsx = await etherscan.getAccountERC721Transactions(walletArray[i]);
+        // erc1155Tsx = await etherscan.getAccountERC1155Transactions(walletArray[i]);
+
+
+        
+        // console.log(ethereumBalance);
+        // console.log(normalTsx);
+        // console.log(internalTsx);
+        // console.log(erc20Tsx);
+        // console.log(erc721Tsx);
+        // console.log(erc1155Tsx);
+    }
+
 
     // Get pricing data from CrypoCompare API
 
@@ -112,27 +180,19 @@ router.post("/summary", function(req, res) {
 
     // let query = fs.readFileSync(path.join(__dirname, '../queries/walletBalances.sql')).toString();
 
-    let query = "SELECT SUM(value) FROM walletBalances INNER JOIN Wallets on walletBalances.wallet = Wallets.idWallet WHERE walletHash in("
-    for (let i = 0; i < walletArray.length; i++) {
-        query = query + "'" + walletArray[i] + "', "
+    let totalValue = 0;
+
+    // console.log(walletArray);
+    
+    // Get wallet(s) total value
+    if (walletArray.length == 1) {
+        totalValue = await queries.getWalletBalance(walletArray[0]);
+    } else {
+        totalValue = await queries.getWalletsBalance(walletArray);
     }
-    query = query.substring(0, query.length - 2) + ");"
-    console.log(query);
 
-    db.query(query, (err, result) => {
-        if (err) {
-            throw err;
-        } else {
-            //Serves the body of the page aka "summary.handlebars" to the container //aka "index.handlebars"
-            res.render('summary', {layout : 'index', totalValue: result[0]["SUM(value)"],  wallets: walletArray});
-        }
-    });
-
-    
-    
-
-    
-    
+    //Serves the body of the page aka "summary.handlebars" to the container //aka "index.handlebars"
+    res.render('summary', {layout : 'index', totalValue: totalValue,  wallets: walletArray});
 
 });
 
@@ -152,10 +212,11 @@ router.post("/wallets", function(req, res) {
 
     let query = "SELECT SUM(value) FROM walletBalances INNER JOIN Wallets on walletBalances.wallet = Wallets.idWallet WHERE walletHash = '" + walletArray[0] + "';"
 
-    db.query(query, (err, result) => {
+    database.query(query, (err, result) => {
         if (err) {
             throw err;
         } else {
+
             // Render wallets page
             //Serves the body of the page aka "wallets.handlebars" to the container //aka "index.handlebars"
             res.render('wallets', {layout : 'index', walletValue: result[0]["SUM(value)"],  wallets: walletArray});
@@ -213,7 +274,7 @@ router.post("/transactions", function(req, res) {
     console.log(query);
     
 
-    db.query(query, (err, result) => {
+    database.query(query, (err, result) => {
         if (err) {
             throw err;
         } else {

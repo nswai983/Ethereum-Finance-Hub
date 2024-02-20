@@ -13,39 +13,130 @@
 
 */
 
-var mysql = require('mysql2');
+const { query } = require("express");
 
-// var con = mysql.createConnection({
-//   MYSQLDATABASE:        "railway",
-//   MYSQLHOST:            "roundhouse.proxy.rlwy.net",
-//   MYSQLUSER:            "root",
-//   MYSQLPORT:            "46480",
-//   MYSQLPASSWORD:        "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E",
-//   MYSQL_DATABASE:       "railway",
-//   MYSQL_ROOT_PASSWORD:  "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E"
-// });
 
-let db = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@roundhouse.proxy.rlwy.net:46480/railway`);
+async function getWalletBalance(wallet) {
 
-/*
-  QUERY: GET BALANCE FOR ALL WALLETS
+  return new Promise((resolve) => {
 
-  SELECT SUM(value)
-  FROM walletBalances
-  WHERE timestamp = TODAY()
+    // Create query
+    let query = "SELECT SUM(value) FROM walletBalances WHERE wallet = " + wallet + ";";
 
-*/
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result[0]["SUM(value)"]);
+      }
+    });
+  });
+};
 
-/*
-  QUERY: GET BALANCE FOR A WALLET
+async function getWalletsBalance(wallets) {
 
-  SELECT SUM(value)
-  FROM walletBalances
-  INNER JOIN Wallets ON walletBalances.wallet = Wallets.idWallet
-  WHERE timestamp = TODAY()
-        AND Wallets.idWallet = [given_wallet_var]
+  return new Promise((resolve) => {
 
-*/
+    // Create query
+    let query = "SELECT SUM(value) FROM walletBalances INNER JOIN Wallets on walletBalances.wallet = Wallets.idWallet WHERE walletHash in("
+    for (let i = 0; i < wallets.length; i++) {
+      query = query + "'" + wallets[i] + "', "
+    }
+    query = query.substring(0, query.length - 2) + ");"
+    
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result[0]["SUM(value)"]);
+      }
+    });
+  });
+}
+
+async function addWallet(wallet) {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "INSERT INTO `Wallets` (`walletHash`) VALUES ('" + wallet + "');"
+    
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function addWallets(wallets) {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "INSERT INTO `Wallets` (`walletHash`) VALUES ("
+    for (let i = 0; i < wallets.length; i++) {
+      query = query + "'" + wallets[i] + "', ";
+    }
+    query = query.substring(0, query.length - 2) + ");"
+    
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function getWallets() {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "SELECT walletHash FROM Wallets;"
+    
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+
+
+async function insertTransaction(tsxHash, date, to, from, fee, wallet) {
+
+  return new Promise((resolve) => {
+
+    // Check if Transaction exists, if not create one
+
+    let query = "INSERT INTO Transactions VALUES ('" + tsxHash + "', '" + date + "', '" + to + "', '" + from + "', '" + fee + "', '" + wallet + "');"
+
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+
+}
+
 
 /*
   QUERY: GET TRANSACTIONS LIST
@@ -113,4 +204,4 @@ let db = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@r
 
 
 // Export router so that it can be used by app.js
-module.exports = db;
+module.exports = {getWalletBalance, getWalletsBalance, addWallets, addWallet, getWallets, insertTransaction}

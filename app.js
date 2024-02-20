@@ -64,8 +64,7 @@ db.connect(function(err) {
     console.log("Connected to mysql database!");
   });
 
-  //make the connection global
-  global.db = db;
+global.db = db;
   
   
   //to keep the connection alive, make frequent quries to SQL database
