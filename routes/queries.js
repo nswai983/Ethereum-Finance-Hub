@@ -11,9 +11,15 @@
     Use of mysql2 package vs mysql came from an authentication issue with mysql package. Issue resolved via this article:
     https://github.com/strapi/strapi/issues/13774
 
+    https://medium.com/@johnkolo/how-to-run-multiple-sql-queries-directly-from-an-sql-file-in-node-js-part-1-dce1e6dd2def
+
+    https://gist.github.com/TheoOkafor/1762e455b0e76c6764f0deabc08c8a77
+
 */
 
 // const { query } = require("express");
+const path = require('path');
+const fs = require('fs');
 
 
 /*
@@ -287,13 +293,28 @@ async function insertTransactionLine(transaction, token, amount, inflow) {
   });
 }
 
-async function deleteTransactions() {
+/*
+  Deletes all data in the database to start a new session.
+*/
+async function deleteData() {
 
   return new Promise((resolve) => {
 
-    // Check if Transaction exists, if not create one
+    let query = fs.readFileSync(path.join(__dirname, '../queries/deleteData.sql')).toString().split(";");
 
-    let query = "DELETE FROM Transactions;"
+    // Execute queries (except final empty string query)
+    for (let i = 0; i < query.length - 1; i++) {
+      subQuery = query[i] + ";";
+      internalQuery(subQuery);
+    }
+
+    resolve(null);
+  });
+}
+
+async function internalQuery(query) {
+
+  return new Promise((resolve) => {
 
     // Execute query
     db.query(query, (err, result) => {
@@ -304,7 +325,7 @@ async function deleteTransactions() {
       }
     });
   });
-}
+};
 
 async function getTransactions(params, walletArray) {
 
@@ -423,4 +444,6 @@ async function getTransactions(params, walletArray) {
 
 
 // Export router so that it can be used by app.js
-module.exports = { getTransactionDates, getWalletBalance, getWalletsBalance, addWallets, addWallet, getWallets, getWalletId, getTokenId, insertToken, insertTransaction, deleteTransactions, getTransactions, getTransaction, insertTransactionLine, getTokens}
+module.exports = { getTransactionDates, getWalletBalance, getWalletsBalance, addWallets, 
+  addWallet, getWallets, getWalletId, getTokenId, insertToken, insertTransaction, 
+  deleteData, getTransactions, getTransaction, insertTransactionLine, getTokens}

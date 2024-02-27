@@ -47,7 +47,7 @@ router.get("/", async function (req, res) {
     res.clearCookie("walletData");
 
     // Clear all transactions
-    // await queries.deleteTransactions();
+    await queries.deleteData();
 
     //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
     res.render('main', { layout: 'index' });
@@ -80,7 +80,7 @@ router.post("/summary", async function (req, res) {
                     walletArray[arrayIndex] = substring
                     arrayIndex++;
 
-                    if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
+                    if (walletArray[0].startsWith("Enter Ethereum wallets here...") || walletArray[0] === "") {
                         //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
                         res.redirect('../');
                         return;
@@ -99,7 +99,7 @@ router.post("/summary", async function (req, res) {
                     index = i + 2;
                     arrayIndex++;
 
-                    if (walletArray[0].startsWith("Enter Ethereum wallets here...")) {
+                    if (walletArray[0].startsWith("Enter Ethereum wallets here...") || walletArray[0] === "") {
                         //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
                         res.redirect('../');
                         return;
@@ -113,8 +113,6 @@ router.post("/summary", async function (req, res) {
 
     // Get list of wallets in database
     databaseWallets = await queries.getWallets();
-    console.log(databaseWallets);
-    console.log(walletArray);
     databaseWalletsArray = [];
     for (let i = 0; i < databaseWallets.length; i++) {
         databaseWalletsArray.push(databaseWallets[i]["walletHash"]);
@@ -127,22 +125,29 @@ router.post("/summary", async function (req, res) {
         if (!databaseWalletsArray.includes(walletArray[i])) {
             // Add wallets to database
             await queries.addWallet(walletArray[i]);
+            console.log("Wallet added to database: " + walletArray[i]);
         }
 
+        console.log("Loading transactions into database for wallet " + walletArray[i] + "...");
         // Get normal transactions loaded into database
         await getTransactions(walletArray[i], "Normal");
+        console.log("Normal transactions loaded for wallet: " + walletArray[i]);
 
         // Get internal transactions loaded into database
         await getTransactions(walletArray[i], "Internal");
+        console.log("Internal transactions loaded for wallet: " + walletArray[i]);
 
         // Get ERC20 transactions loaded into database
         await getTransactions(walletArray[i], "ERC20");
+        console.log("ERC20 transactions loaded for wallet: " + walletArray[i]);
 
         // Get ERC721 transactions loaded into database
         await getTransactions(walletArray[i], "ERC721");
+        console.log("ERC721 transactions loaded for wallet: " + walletArray[i]);
 
         // Get ERC1155 transactions loaded into database
         await getTransactions(walletArray[i], "ERC1155");
+        console.log("ERC1155 transactions loaded for wallet: " + walletArray[i]);
 
     }
 
@@ -310,19 +315,24 @@ async function getTransactions(wallet, transactionType) {
             // If token ID is not in database, insert token into databse
             if (idToken === undefined) {
 
-                if (tsxArray[j].contractAddress === '') {
-                    // Insert ETH token into database
-                    await queries.insertToken("ETH", "", "Ethereum");
+                if (tsxArray[i].contractAddress === '') {
 
                     idToken = await queries.getTokenId("ETH");
 
+                    if (idToken === undefined) {
+                    // Insert ETH token into database
+                    await queries.insertToken("ETH", "ETH", "Ethereum");
+
+                    idToken = await queries.getTokenId("ETH");
+                    }
                 } else {
+                    console.log(tsxArray[i].contractAddress);
                     // Get token info from etherscan
                     let tokenInfo = await etherscan.getTokenInfo(tsxArray[i].contractAddress); 
 
                     // Insert token into database
                     await queries.insertToken(tokenInfo.tokenName, tsxArray[i].contractAddress, "Ethereum");
-
+                    console.log("Token Added: " + tokenInfo);
                     // Re-query token ID
                     idToken = await queries.getTokenId(tsxArray[i].contractAddress);
                 }
@@ -332,7 +342,7 @@ async function getTransactions(wallet, transactionType) {
 
             if (transactionData) {
                 // insert current transaction line into database
-                await queries.insertTransactionLine(transactionData.idTransaction, idToken, tsxArray[i].value / valueDivisor, 0); // to update for inflow/outflow
+                await queries.insertTransactionLine(transactionData.idTransaction, idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
                 
             } else {
                 // Format date to be inserted
@@ -345,7 +355,7 @@ async function getTransactions(wallet, transactionType) {
                 transactionData = await queries.getTransaction(tsxArray[i].hash);
                 
                 // insert current transaction line into database
-                await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, tsxArray[i].value / valueDivisor, 0); // to update for inflow/outflow
+                await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
             }
             
         }
