@@ -158,7 +158,7 @@ async function getTokens() {
   return new Promise((resolve) => {
 
     // Create query
-    let query = "SELECT tokenName FROM Tokens;"
+    let query = "SELECT tokenName FROM Tokens GROUP BY tokenName;"
 
     // Execute query
     db.query(query, (err, result) => {

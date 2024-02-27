@@ -31,6 +31,7 @@ const fs = require('fs');
 let queries = require("./queries");
 let cookieParser = require('cookie-parser');
 let etherscan = require("./etherscan");
+let cryptoCompare = require("./cryptoCompare");
 let dateTime = require('node-datetime')
 
 
@@ -328,11 +329,17 @@ async function getTransactions(wallet, transactionType) {
                 } else {
                     console.log(tsxArray[i].contractAddress);
                     // Get token info from etherscan
-                    let tokenInfo = await etherscan.getTokenInfo(tsxArray[i].contractAddress); 
+                    let tokenInfo = await cryptoCompare.getTokenInfo(tsxArray[i].contractAddress);
+
+                    // If token info was not found, replace with contract address
+                    if (tokenInfo === "N/A") {
+                        tokenInfo = tsxArray[i].contractAddress;
+                    }
 
                     // Insert token into database
-                    await queries.insertToken(tokenInfo.tokenName, tsxArray[i].contractAddress, "Ethereum");
+                    await queries.insertToken(tokenInfo, tsxArray[i].contractAddress, "Ethereum");
                     console.log("Token Added: " + tokenInfo);
+                    
                     // Re-query token ID
                     idToken = await queries.getTokenId(tsxArray[i].contractAddress);
                 }
