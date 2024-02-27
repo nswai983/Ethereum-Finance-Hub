@@ -113,6 +113,8 @@ router.post("/summary", async function (req, res) {
 
     // Get list of wallets in database
     databaseWallets = await queries.getWallets();
+    console.log(databaseWallets);
+    console.log(walletArray);
     databaseWalletsArray = [];
     for (let i = 0; i < databaseWallets.length; i++) {
         databaseWalletsArray.push(databaseWallets[i]["walletHash"]);
@@ -127,97 +129,22 @@ router.post("/summary", async function (req, res) {
             await queries.addWallet(walletArray[i]);
         }
 
-        // Get normal transactions for wallet
-        let pageNum = 1;
-        let pagesRemaining = true;
-        let normalTsx = [];
+        // Get normal transactions loaded into database
+        await getTransactions(walletArray[i], "Normal");
 
-        while (pagesRemaining) {
+        // Get internal transactions loaded into database
+        await getTransactions(walletArray[i], "Internal");
 
-            // Get new transactions
-            let newTsx = await etherscan.getAccountNormalTransactions(walletArray[i], pageNum);
+        // Get ERC20 transactions loaded into database
+        await getTransactions(walletArray[i], "ERC20");
 
-            // Add new transactions to array
-            normalTsx = normalTsx.concat(newTsx);
+        // Get ERC721 transactions loaded into database
+        await getTransactions(walletArray[i], "ERC721");
 
-            // See if we have reached the end of the transactions. If not, add 1 to page number
-            // console.log(newTsx.length);
-            // console.log(pageNum);
-            if (newTsx.length < 1000) {
-                pagesRemaining = false
-            } else {
-                pageNum++;
-            }
-        }
+        // Get ERC1155 transactions loaded into database
+        await getTransactions(walletArray[i], "ERC1155");
 
-        // Add each normal transaction to the database
-        for (let j = 0; j < normalTsx.length; j++) {
-
-            // If transaction has issues, continue
-            if (normalTsx[j] === undefined) {
-                continue
-            } else {
-
-                console.log(normalTsx[j]);
-
-                // Get wallet ID for transaction
-                let idWallet = await queries.getWalletId(walletArray[i]);
-
-                // Get Token ID
-                let idToken = await queries.getTokenId(normalTsx[j].contractAddress);
-
-                // If token ID is not in database, insert token into databse
-                if (idToken === undefined) {
-
-                    if (normalTsx[j].contractAddress === '') {
-                        // Insert ETH token into database
-                        await queries.insertToken("ETH", "N/A", "Ethereum");
-                    } else {
-                        // Get token info from etherscan
-                        let tokenInfo = await etherscan.getTokenInfo(normalTsx[j].contractAddress);
-
-                        // Insert token into database
-                        await queries.insertToken(tokenInfo.tokenName, normalTsx[j].contractAddress, "Ethereum");
-                    }
-
-
-                }
-
-                let idTsx = await queries.getTransaction(normalTsx[j].hash)[0];
-
-                if (idTsx) {
-                    // insert current transaction line into database
-                    await queries.insertTransactionLine(idTsx, idToken, normalTsx[j].value, 0); // to update for inflow/outflow
-                    
-                } else {
-                    // Format date to be inserted
-                    let d = new Date(Date(normalTsx[j].timeStamp));
-                    
-                    // Since transaction does not yet exist in database, insert into database
-                    await queries.insertTransaction(normalTsx[j].hash, "" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(), normalTsx[j].to, normalTsx[j].from, normalTsx[j].gasUsed, idWallet);
-
-                    // Get transaction ID now that it has been created
-                    idTsx = await queries.getTransaction(normalTsx[j].hash)[0];
-                    
-                    // insert current transaction line into database
-                    await queries.insertTransactionLine(idTsx, idToken, normalTsx[j].value, 0); // to update for inflow/outflow
-                }
-                
-            }
-        }
     }
-
-    // internalTsx = await etherscan.getAccountInternalTransactions(walletArray[i]);
-    // erc20Tsx = await etherscan.getAccountERC20Transactions(walletArray[i]);
-    // erc721Tsx = await etherscan.getAccountERC721Transactions(walletArray[i]);
-    // erc1155Tsx = await etherscan.getAccountERC1155Transactions(walletArray[i]);
-
-    // console.log(ethereumBalance);
-    // console.log(normalTsx);
-    // console.log(internalTsx);
-    // console.log(erc20Tsx);
-    // console.log(erc721Tsx);
-
 
     // Get pricing data from CrypoCompare API
 
@@ -271,9 +198,9 @@ router.post("/wallets", async function (req, res) {
 router.post("/transactions", async function (req, res) {
 
     // Collect wallet data
-    let walletArray = req.cookies["walletData"]
-    let tokens = ["ETH", "USDC", "BTC"];
-    let dates = ["2/12/2024"]
+    let walletArray = req.cookies["walletData"];
+    let tokens = await queries.getTokens();
+    let dates = await queries.getTransactionDates();
 
     // Check wallet data; throw error if issues found
 
@@ -285,10 +212,8 @@ router.post("/transactions", async function (req, res) {
 
 
 
-    // Add semicolon to end
+    // Get transactions
     let transactionData = await queries.getTransactions(req.body, walletArray);
-
-    console.log(transactionData);
 
     // Render transactions page
     //Serves the body of the page aka "transactions.handlebars" to the container //aka "index.handlebars"
@@ -300,10 +225,132 @@ router.post("/transactions", async function (req, res) {
     HELPER FUNCTIONS
 */
 
+/*
+    Receives an Ethereum wallet and loads all transactions of the given type from that wallet into the database.
+*/
+async function getTransactions(wallet, transactionType) {
+    // Get normal transactions for wallet
+    let pageNum = 1;
+    let pagesRemaining = true;
+    let tsxArray = [];
+    let valueDivisor;
 
+    // Get new transactions loaded into database
+    while (pagesRemaining) {
 
+        // Get new transactions
+        let newTsx;
 
+        switch(transactionType){
+            case "Normal":
+                newTsx = await etherscan.getAccountNormalTransactions(wallet, pageNum);
+                break;
+            case "Internal":
+                newTsx = await etherscan.getAccountInternalTransactions(wallet, pageNum);
+                break;
+            case "ERC20":
+                newTsx = await etherscan.getAccountERC20Transactions(wallet, pageNum);
+                break;
+            case "ERC721":
+                newTsx = await etherscan.getAccountERC721Transactions(wallet, pageNum);
+                break;
+            case "ERC1155":
+                newTsx = await etherscan.getAccountERC1155Transactions(wallet, pageNum);
+                break;
+            default:
+                throw new Error("Transaction type not found.")
+        }
 
+        // Add new transactions to array
+        tsxArray = tsxArray.concat(newTsx);
+
+        // See if we have reached the end of the transactions. If not, add 1 to page number
+        if (newTsx.length < 1000) {
+            pagesRemaining = false
+        } else {
+            pageNum++;
+        }
+    }
+
+    // Set Value Divisor
+    switch(transactionType){
+        case "Normal":
+            valueDivisor = 1000000000000000000;
+            break;
+        case "Internal":
+            valueDivisor = 1000000000000000000;
+            break;
+        case "ERC20":
+            valueDivisor = 1000000000000000000;
+            break;
+        case "ERC721":
+            valueDivisor = 1;
+            break;
+        case "ERC1155":
+            valueDivisor = 1;
+            break;
+        default:
+            throw new Error("Transaction type not found.")
+    }
+
+    // Add each normal transaction to the database
+    for (let i = 0; i < tsxArray.length; i++) {
+
+        // If transaction has issues, continue
+        if (tsxArray[i] === undefined) {
+            continue
+        } else {
+
+            // Get wallet ID for transaction
+            let idWallet = await queries.getWalletId(wallet);
+
+            // Get Token ID
+            let idToken = await queries.getTokenId(tsxArray[i].contractAddress);
+
+            // If token ID is not in database, insert token into databse
+            if (idToken === undefined) {
+
+                if (tsxArray[j].contractAddress === '') {
+                    // Insert ETH token into database
+                    await queries.insertToken("ETH", "", "Ethereum");
+
+                    idToken = await queries.getTokenId("ETH");
+
+                } else {
+                    // Get token info from etherscan
+                    let tokenInfo = await etherscan.getTokenInfo(tsxArray[i].contractAddress); 
+
+                    // Insert token into database
+                    await queries.insertToken(tokenInfo.tokenName, tsxArray[i].contractAddress, "Ethereum");
+
+                    // Re-query token ID
+                    idToken = await queries.getTokenId(tsxArray[i].contractAddress);
+                }
+            }
+
+            let transactionData = await queries.getTransaction(tsxArray[i].hash)[0];
+
+            if (transactionData) {
+                // insert current transaction line into database
+                await queries.insertTransactionLine(transactionData.idTransaction, idToken, tsxArray[i].value / valueDivisor, 0); // to update for inflow/outflow
+                
+            } else {
+                // Format date to be inserted
+                let d = new Date(Date(tsxArray[i].timeStamp));
+                
+                // Since transaction does not yet exist in database, insert into database
+                await queries.insertTransaction(tsxArray[i].hash, "" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(), tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet);
+
+                // Get transaction ID now that it has been created
+                transactionData = await queries.getTransaction(tsxArray[i].hash);
+                
+                // insert current transaction line into database
+                await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, tsxArray[i].value / valueDivisor, 0); // to update for inflow/outflow
+            }
+            
+        }
+    }
+}
 
 // Export router so that it can be used by app.js
 module.exports = router;

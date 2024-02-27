@@ -18,7 +18,7 @@
             <select name="token_filter" id="token_filter">
                 <option value="all">All</option>
                 {{#each tokens}}
-                <option value={{this}} >{{this}}</option>
+                <option value={{this.tokenName}} >{{this.tokenName}}</option>
                 {{/each}}
             </select>
         </td>
@@ -27,7 +27,7 @@
             <select name="date_filter" id="date_filter">
                 <option value="all">All</option>
                 {{#each dates}}
-                <option value={{this}} >{{this}}</option>
+                <option value={{this.date}} >{{this.date}}</option>
                 {{/each}}
             </select>
         </td>
@@ -44,6 +44,10 @@
         </td>
     </tr>
 </table>
+
+<br>
+
+    <button type="submit" formaction="/transactions" formmethod="post">Refresh</button>
 
 <br>
 <br>
@@ -77,11 +81,6 @@
 
 <br>
 <br>
-
-
-    <button type="submit" formaction="/transactions" formmethod="post">Refresh</button>
-    <br>
-    <br>
     <button type="submit" formaction="/wallets" formmethod="post">See Wallets</button>
     <br>
     <br>

@@ -147,6 +147,24 @@ async function getWalletId(wallet) {
   });
 }
 
+async function getTokens() {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "SELECT tokenName FROM Tokens;"
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
 async function getTokenId(tokenAddress) {
 
   return new Promise((resolve) => {
@@ -230,6 +248,24 @@ async function getTransaction(tsxHash) {
   });
 }
 
+async function getTransactionDates() {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "SELECT date FROM Transactions GROUP BY date;"
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
 async function insertTransactionLine(transaction, token, amount, inflow) {
 
   return new Promise((resolve) => {
@@ -258,8 +294,6 @@ async function deleteTransactions() {
     // Check if Transaction exists, if not create one
 
     let query = "DELETE FROM Transactions;"
-
-    // console.log(query);
 
     // Execute query
     db.query(query, (err, result) => {
@@ -302,12 +336,12 @@ async function getTransactions(params, walletArray) {
 
         // Add Date Filter
         if (params.date_filter !== "all" && params.date_filter !== undefined && params.date_filter !== "") {
-            query = query + " AND date = '" + params.date_filter + "'"
+          let d = new Date(Date(params.date_filter));
+            query = query + " AND date = '" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate() + "'";
         }
     }
 
     query = query + ";"
-
     console.log(query);
 
     // Execute query
@@ -315,7 +349,7 @@ async function getTransactions(params, walletArray) {
       if (err) {
         throw err;
       } else {
-        console.log(result);
+        // console.log(result);
         resolve(result);
       }
     });
@@ -389,4 +423,4 @@ async function getTransactions(params, walletArray) {
 
 
 // Export router so that it can be used by app.js
-module.exports = { getWalletBalance, getWalletsBalance, addWallets, addWallet, getWallets, getWalletId, getTokenId, insertToken, insertTransaction, deleteTransactions, getTransactions, getTransaction, insertTransactionLine}
+module.exports = { getTransactionDates, getWalletBalance, getWalletsBalance, addWallets, addWallet, getWallets, getWalletId, getTokenId, insertToken, insertTransaction, deleteTransactions, getTransactions, getTransaction, insertTransactionLine, getTokens}
