@@ -20,6 +20,7 @@
 
 */
 
+// Modules to use
 let express = require("express");
 let index = require("./routes/index");
 let db = require("./routes/mysql");
@@ -29,9 +30,6 @@ let bodyParser = require('body-parser');
 // Initialize app
 let app = express();
 
-// Set view engine to pug
-// app.set('view engine', 'pug');
-
 // The following code is taken from the Medium article on Handlebars
 
 //Loads the handlebars module
@@ -40,41 +38,39 @@ let handlebars = require('express-handlebars');
 //Sets our app to use the handlebars engine
 app.set('view engine', 'handlebars');
 
-
 //Sets handlebars configurations (we will go through them later on)
 app.engine('handlebars', handlebars.engine({
-    layoutsDir: `${__dirname}/views/layouts`
+  layoutsDir: `${__dirname}/views/layouts`
 }));
 
+// Set up abaility to process cookies and body responses
 app.use(express.static('public'));
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Set port
 let port = 27612
 
-// Use index.js routing file
-// app.use("/", index);
-
+// Use index file for routing
 app.use("/", index);
 
 //connect to database once app is started
-db.connect(function(err) {
-    if (err) throw err;
-    console.log("Connected to mysql database!");
-  });
+db.connect(function (err) {
+  if (err) throw err;
+  console.log("Connected to mysql database!");
+});
 
+// Make database global
 global.db = db;
-  
-  
-  //to keep the connection alive, make frequent quries to SQL database
-  setInterval(function () {
-    db.query('SELECT 1');
-  }, 5000);
+
+//to keep the connection alive, make frequent quries to SQL database
+setInterval(function () {
+  db.query('SELECT 1');
+}, 5000);
 
 // Listen for web traffic
 app.listen(port, function () {
 
-    console.log("Ethereum Finance Hub running on port " + port + "!");
+  console.log("Ethereum Finance Hub running on port " + port + "!");
 
 });

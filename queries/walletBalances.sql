@@ -1,1 +1,2 @@
-SELECT SUM(value) FROM walletBalances;
+SELECT SUM(value)
+FROM walletBalances;

@@ -7,15 +7,19 @@
 
 */
 
+// URL for API Calls
 let API_URL = "https://api.etherscan.io/api";
 
+// API Key for API Calls
 let API_KEY = "AYQTU3RTP3P5VY16C6NKF5T3CAXBXS5W9Y";
 
-// import node-fetch
+// import axios for API processing
 const axios = require('axios');
 
-
-function getAccountEthereumBalance(wallet) {
+/*
+    Returns the ethereum account balance for a given wallet
+*/
+async function getAccountEthereumBalance(wallet) {
 
     return new Promise((resolve) => {
 
@@ -26,19 +30,23 @@ function getAccountEthereumBalance(wallet) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
 
         }, 250);
     });
 
 }
 
+/*
+    Returns a list of normal transactions for a given ethereum wallet. Processes by
+    page number, as there are only 1000 records returned per page.
+*/
 async function getAccountNormalTransactions(wallet, page) {
 
     return new Promise((resolve) => {
@@ -50,18 +58,22 @@ async function getAccountNormalTransactions(wallet, page) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
         }, 250);
     });
 
 }
 
+/*
+    Returns a list of internal transactions for a given ethereum wallet. Processes by
+    page number, as there are only 1000 records returned per page.
+*/
 async function getAccountInternalTransactions(wallet) {
 
     return new Promise((resolve) => {
@@ -73,18 +85,22 @@ async function getAccountInternalTransactions(wallet) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
         }, 250);
     });
 
 }
 
+/*
+    Returns a list of ERC20 transactions for a given ethereum wallet. Processes by
+    page number, as there are only 1000 records returned per page.
+*/
 async function getAccountERC20Transactions(wallet) {
 
     return new Promise((resolve) => {
@@ -96,18 +112,22 @@ async function getAccountERC20Transactions(wallet) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
         }, 250);
     });
 
 }
 
+/*
+    Returns a list of ERC721 transactions for a given ethereum wallet. Processes by
+    page number, as there are only 1000 records returned per page.
+*/
 async function getAccountERC721Transactions(wallet) {
 
     return new Promise((resolve) => {
@@ -119,18 +139,22 @@ async function getAccountERC721Transactions(wallet) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
         }, 250);
     });
 
 }
 
+/*
+    Returns a list of ERC1155 transactions for a given ethereum wallet. Processes by
+    page number, as there are only 1000 records returned per page.
+*/
 async function getAccountERC1155Transactions(wallet) {
 
     return new Promise((resolve) => {
@@ -142,15 +166,43 @@ async function getAccountERC1155Transactions(wallet) {
 
             // Perform API Call
             axios
-            .get(API_CALL)
-            .then(response => {
-                resolve(response.data.result);
-            })
-            .catch(error => {
-                resolve(error);
-            });
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
         }, 250);
     });
 
 }
-module.exports = {getAccountEthereumBalance, getAccountNormalTransactions, getAccountInternalTransactions, getAccountERC20Transactions, getAccountERC721Transactions, getAccountERC1155Transactions}
+
+/*
+    Returns the information for a specific token contract address.
+*/
+async function getTokenInfo(contractaddress) {
+
+    return new Promise((resolve) => {
+
+        setTimeout(() => {
+
+            // API call variable creation
+            let API_CALL = API_URL + "?module=token&action=tokeninfo&contractaddress=" + contractaddress + "&apikey=" + API_KEY;
+
+            // Perform API Call
+            axios
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data.result);
+                })
+                .catch(error => {
+                    resolve(error);
+                });
+        }, 250);
+    });
+
+}
+
+// Exports functions to the application
+module.exports = { getAccountEthereumBalance, getAccountNormalTransactions, getAccountInternalTransactions, getAccountERC20Transactions, getAccountERC721Transactions, getAccountERC1155Transactions, getTokenInfo }

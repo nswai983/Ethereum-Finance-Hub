@@ -6,7 +6,7 @@
 <label for="wallets">Filter by: </label>
 <select name="wallets" id="wallets">
     {{#each wallets}}
-    <option value={{this}} >{{this}}</option>
+    <option value={{this}}>{{this}}</option>
     {{/each}}
 </select>
 
@@ -14,8 +14,8 @@
 <br>
 
 <form>
-<button type="submit" formaction="/transactions" formmethod="post">See Transactions</button>
+    <button type="submit" formaction="/transactions" formmethod="post">See Transactions</button>
     <br>
     <br>
-<button type="submit" formaction="/summary" formmethod="post">See Summary</button>
+    <button type="submit" formaction="/summary" formmethod="post">See Summary</button>
 </form>
