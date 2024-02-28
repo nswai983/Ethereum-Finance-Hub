@@ -22,6 +22,10 @@
 
     For date strings: https://stackoverflow.com/questions/45906215/insert-date-to-mysql-with-node
 
+    https://www.freecodecamp.org/news/how-to-convert-a-string-to-a-number-in-javascript/
+
+    https://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
+
 */
 
 let express = require("express");
@@ -207,6 +211,27 @@ router.post("/transactions", async function (req, res) {
     let walletArray = req.cookies["walletData"];
     let tokens = await queries.getTokens();
     let dates = await queries.getTransactionDates();
+    let dateStrings = [];
+
+    // Set up dates to be in line with readable format
+    for (let i = 0; i < dates.length; i++) {
+        // Format date
+        let year = dates[i]["date"].getFullYear().toString();
+        let month = dates[i]["date"].getMonth() + 1;
+        if (month < 10) {
+            month = "0" + month.toString();
+        } else {
+            month = month.toString();
+        }
+        let day = dates[i]["date"].getDate();
+        if (day < 10) {
+            day = "0" + day.toString();
+        } else {
+            day = day.toString();
+        }
+        dateStrings.push(year + "-" + month + "-" + day);
+    }
+
 
     // Check wallet data; throw error if issues found
 
@@ -223,7 +248,7 @@ router.post("/transactions", async function (req, res) {
 
     // Render transactions page
     //Serves the body of the page aka "transactions.handlebars" to the container //aka "index.handlebars"
-    res.render('transactions', { layout: 'index', wallets: walletArray, tokens: tokens, dates: dates, transactions: transactionData });
+    res.render('transactions', { layout: 'index', wallets: walletArray, tokens: tokens, dates: dateStrings, transactions: transactionData });
 });
 
 
@@ -339,7 +364,7 @@ async function getTransactions(wallet, transactionType) {
                     // Insert token into database
                     await queries.insertToken(tokenInfo, tsxArray[i].contractAddress, "Ethereum");
                     console.log("Token Added: " + tokenInfo);
-                    
+
                     // Re-query token ID
                     idToken = await queries.getTokenId(tsxArray[i].contractAddress);
                 }
@@ -353,10 +378,15 @@ async function getTransactions(wallet, transactionType) {
                 
             } else {
                 // Format date to be inserted
-                let d = new Date(Date(tsxArray[i].timeStamp));
+                let d = new Date(Number(tsxArray[i]["timeStamp"]) * 1000);
+                let year = d.getFullYear().toString();
+                let month = d.getMonth() + 1;
+                month = month.toString();
+                let day = d.getDate().toString();
+                let date = year + "-" + month + "-" + day;
                 
                 // Since transaction does not yet exist in database, insert into database
-                await queries.insertTransaction(tsxArray[i].hash, "" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(), tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet);
+                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet);
 
                 // Get transaction ID now that it has been created
                 transactionData = await queries.getTransaction(tsxArray[i].hash);

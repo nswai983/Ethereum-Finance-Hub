@@ -259,7 +259,7 @@ async function getTransactionDates() {
   return new Promise((resolve) => {
 
     // Create query
-    let query = "SELECT date FROM Transactions GROUP BY date;"
+    let query = "SELECT date FROM Transactions GROUP BY date ORDER BY date;"
 
     // Execute query
     db.query(query, (err, result) => {
@@ -357,8 +357,7 @@ async function getTransactions(params, walletArray) {
 
         // Add Date Filter
         if (params.date_filter !== "all" && params.date_filter !== undefined && params.date_filter !== "") {
-          let d = new Date(Date(params.date_filter));
-            query = query + " AND date = '" + d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate() + "'";
+            query = query + " AND date = '" + params.date_filter + "'";
         }
     }
 
