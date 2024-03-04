@@ -26,6 +26,8 @@
 
     https://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
 
+    https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
+
 */
 
 let express = require("express");
@@ -36,7 +38,8 @@ let queries = require("./queries");
 let cookieParser = require('cookie-parser');
 let etherscan = require("./etherscan");
 let cryptoCompare = require("./cryptoCompare");
-let dateTime = require('node-datetime')
+let dateTime = require('node-datetime');
+const { time } = require("console");
 
 
 // let handlebars = require("handlebars");
@@ -153,10 +156,17 @@ router.post("/summary", async function (req, res) {
         // Get ERC1155 transactions loaded into database
         await getTransactions(walletArray[i], "ERC1155");
         console.log("ERC1155 transactions loaded for wallet: " + walletArray[i]);
-
     }
 
     // Get pricing data from CrypoCompare API
+    let tokenArray = await queries.getTokenContractAddresses();
+    console.log(tokenArray);
+    for (let i = 0; i < tokenArray.length; i++) {
+        if (tokenArray[i]["tokenName"] && tokenArray[i]["tokenName"].length !== 42) {
+            await getPrices(tokenArray[i]["tokenName"], tokenArray[i]["contractAddress"]);
+        }
+    }
+
 
     // Get wallet(s) balance / total value
     let totalValue = 0;
@@ -378,7 +388,8 @@ async function getTransactions(wallet, transactionType) {
                 
             } else {
                 // Format date to be inserted
-                let d = new Date(Number(tsxArray[i]["timeStamp"]) * 1000);
+                let timestamp = Number(tsxArray[i]["timeStamp"]);
+                let d = new Date(timestamp * 1000);
                 let year = d.getFullYear().toString();
                 let month = d.getMonth() + 1;
                 month = month.toString();
@@ -386,7 +397,7 @@ async function getTransactions(wallet, transactionType) {
                 let date = year + "-" + month + "-" + day;
                 
                 // Since transaction does not yet exist in database, insert into database
-                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet);
+                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet, timestamp);
 
                 // Get transaction ID now that it has been created
                 transactionData = await queries.getTransaction(tsxArray[i].hash);
@@ -397,6 +408,51 @@ async function getTransactions(wallet, transactionType) {
             
         }
     }
+}
+
+/*
+    Receives an Ethereum token and loads all prices up to the earliest date of transactions for that token into the database.
+*/
+async function getPrices(tokenSymbol, contractAddress) {
+
+    let tokenID = await queries.getTokenId(contractAddress);
+
+    // Get earliest transaction date for token
+    let timestamps = await queries.getTransactionTimestampsByToken(contractAddress);
+    let earliestTimestamp;
+    let latestTimestamp;
+    if (timestamps) {
+        earliestTimestamp = timestamps[0]["timestamp"];
+        latestTimestamp = timestamps[timestamps.length - 1]["timestamp"];
+    }
+
+    // Get price for each timestamp and add to database
+    for (i in timestamps) {
+
+        // console.log(timestamps[i]["timestamp"]);
+        
+        let price = await cryptoCompare.getTokenPrice(tokenSymbol, timestamps[i]["timestamp"])
+        // console.log(price);
+
+        if (price === "N/A") {
+            continue
+        } else {
+            // Format date to be inserted
+            let timestamp = Number(timestamps[i]["timestamp"]);
+            let d = new Date(timestamp * 1000);
+            let year = d.getFullYear().toString();
+            let month = d.getMonth() + 1;
+            month = month.toString();
+            let day = d.getDate().toString();
+            let date = year + "-" + month + "-" + day;
+
+            await queries.insertPrice(tokenID, date, price[tokenSymbol]["USD"]);
+        }
+    }
+
+    // console.log(timestamps);
+    // console.log(earliestTimestamp);
+    // console.log(latestTimestamp);
 }
 
 // Export router so that it can be used by app.js

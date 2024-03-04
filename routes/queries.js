@@ -15,12 +15,13 @@
 
     https://gist.github.com/TheoOkafor/1762e455b0e76c6764f0deabc08c8a77
 
+    https://stackoverflow.com/questions/498197/mysql-how-to-join-tables-on-two-fields
+
 */
 
 // const { query } = require("express");
 const path = require('path');
 const fs = require('fs');
-
 
 /*
   Funtion getWalletBalance(wallet: a specific wallet)
@@ -171,6 +172,24 @@ async function getTokens() {
   });
 }
 
+async function getTokenContractAddresses() {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "SELECT tokenName, contractAddress FROM Tokens GROUP BY contractAddress;"
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
 async function getTokenId(tokenAddress) {
 
   return new Promise((resolve) => {
@@ -212,13 +231,32 @@ async function insertToken(tokenName, contractAddress, blockchain) {
   });
 }
 
-async function insertTransaction(tsxHash, date, to, from, fee, wallet) {
+async function insertPrice(tokenID, date, price) {
+
+  return new Promise((resolve) => {
+
+    // Create query
+    let query = "INSERT INTO Prices (`token`, `date`, `price`) VALUES (" + tokenID + ", '" + date + "', " + price + ");"
+    // console.log(query);
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function insertTransaction(tsxHash, date, to, from, fee, wallet, timestamp) {
 
   return new Promise((resolve) => {
 
     // Check if Transaction exists, if not create one
 
-    let query = "INSERT INTO Transactions (`tsxHash`, `date`, `to`, `from`, `fee`, `wallet` ) VALUES ('" + tsxHash + "', '" + date + "', '" + to + "', '" + from + "', '" + fee + "', '" + wallet + "');"
+    let query = "INSERT INTO Transactions (`tsxHash`, `date`, `to`, `from`, `fee`, `wallet`, `timestamp` ) VALUES ('" + tsxHash + "', '" + date + "', '" + to + "', '" + from + "', '" + fee + "', '" + wallet + "', " + timestamp + ");"
 
     // console.log(query);
 
@@ -308,7 +346,8 @@ async function deleteData() {
       internalQuery(subQuery);
     }
 
-    resolve(null);
+    console.log("Data Deleted");
+    resolve("Data Deleted");
   });
 }
 
@@ -332,7 +371,7 @@ async function getTransactions(params, walletArray) {
   return new Promise((resolve) => {
 
 
-    let query = "SELECT * FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet"
+    let query = "SELECT *, amount * price AS value FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet INNER JOIN Prices ON TransactionLines.token = Prices.token AND Transactions.date = Prices.date"
 
 
     if (params.tsxHashSearch_filter !== undefined && params.tsxHashSearch_filter !== "Search Transactions..." && params.tsxHashSearch_filter !== "") {
@@ -362,6 +401,28 @@ async function getTransactions(params, walletArray) {
     }
 
     query = query + ";"
+    console.log(query);
+
+    // Execute query
+    db.query(query, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        // console.log(result);
+        resolve(result);
+      }
+    });
+  });
+}
+
+async function getTransactionTimestampsByToken(contractAddress) {
+
+  return new Promise((resolve) => {
+
+
+    let query = "SELECT timestamp FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet"
+    query = query + ` WHERE contractAddress = '${contractAddress}' GROUP BY timestamp ORDER BY timestamp ASC;`
+
     console.log(query);
 
     // Execute query
@@ -445,4 +506,5 @@ async function getTransactions(params, walletArray) {
 // Export router so that it can be used by app.js
 module.exports = { getTransactionDates, getWalletBalance, getWalletsBalance, addWallets, 
   addWallet, getWallets, getWalletId, getTokenId, insertToken, insertTransaction, 
-  deleteData, getTransactions, getTransaction, insertTransactionLine, getTokens}
+  deleteData, getTransactions, getTransaction, insertTransactionLine, getTokens,
+  getTransactionTimestampsByToken, insertPrice, getTokenContractAddresses}

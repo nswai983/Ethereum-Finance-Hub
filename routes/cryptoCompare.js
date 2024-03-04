@@ -8,7 +8,8 @@
 */
 
 // URL for API Calls
-let API_URL = "https://data-api.cryptocompare.com/";
+let API_URL_DATA = "https://data-api.cryptocompare.com/";
+let API_URL_PRICE = "https://min-api.cryptocompare.com/";
 
 // API Key for API Calls
 let API_KEY = "94238a4e89f43d0967286ea84fff3c1e8aa7d5c97b296636841bffa1bcc92ce2";
@@ -22,12 +23,11 @@ const axios = require('axios');
 async function getTokenInfo(contractaddress) {
 
     return new Promise((resolve) => {
-
         setTimeout(() => {
 
             // API call variable creation
-            let API_CALL = API_URL + "onchain/v1/data/by/address?address=" + contractaddress + "&chain_symbol=ETH&api_key=" + API_KEY;
-
+            let API_CALL = API_URL_DATA + "onchain/v1/data/by/address?address=" + contractaddress + "&chain_symbol=ETH&api_key=" + API_KEY;
+            
             // Perform API Call
             axios
                 .get(API_CALL)
@@ -37,10 +37,33 @@ async function getTokenInfo(contractaddress) {
                 .catch(error => {
                     resolve("N/A");
                 });
-        }, 250);
+        }, 10);
     });
+}
 
+/*
+    Returns the pricing information for a specific token contract address at a specified date.
+*/
+async function getTokenPrice(tokenSymbol, timestamp) {
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+
+            // API call variable creation
+            let API_CALL = API_URL_PRICE + "data/pricehistorical?fsym=" + tokenSymbol + "&tsyms=USD&ts=" + timestamp + "&api_key=" + API_KEY;
+            
+            // Perform API Call
+            axios
+                .get(API_CALL)
+                .then(response => {
+                    resolve(response.data);
+                })
+                .catch(error => {
+                    resolve("N/A");
+                });
+        }, 10);
+    });
 }
 
 // Exports functions to the application
-module.exports = { getTokenInfo }
+module.exports = { getTokenInfo, getTokenPrice }
