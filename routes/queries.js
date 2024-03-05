@@ -400,7 +400,7 @@ async function getTransactions(params, walletArray) {
         }
     }
 
-    query = query + ";"
+    query = query + " ORDER BY Transactions.date, Transactions.idTransaction ASC;"
     console.log(query);
 
     // Execute query
