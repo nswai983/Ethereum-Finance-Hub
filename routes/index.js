@@ -28,6 +28,7 @@
 
     https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
 
+
 */
 
 let express = require("express");
@@ -42,9 +43,8 @@ let dateTime = require('node-datetime');
 const { time } = require("console");
 
 
+
 // let handlebars = require("handlebars");
-
-
 
 /*
     Routes to the index page using a GET http request.

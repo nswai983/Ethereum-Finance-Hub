@@ -380,23 +380,23 @@ async function getTransactions(params, walletArray) {
 
         // Add wallet filters in where clause
         if (params.wallet_filter === "all" || params.wallet_filter === undefined) {
-            query = query + " WHERE walletHash in("
+            query = query + " WHERE Wallets.walletHash in("
             for (let i = 0; i < walletArray.length; i++) {
                 query = query + "'" + walletArray[i] + "', "
             }
             query = query.substring(0, query.length - 2) + ")";
         } else {
-            query = query + " WHERE walletHash = '" + params.wallet_filter + "'"
+            query = query + " WHERE Wallets.walletHash = '" + params.wallet_filter + "'"
         }
 
         // Add Token filters
         if (params.token_filter !== "all" && params.token_filter !== undefined && params.token_filter !== "") {
-            query = query + " AND tokenName = '" + params.token_filter + "'"
+            query = query + " AND Tokens.tokenName = '" + params.token_filter + "'"
         }
 
         // Add Date Filter
         if (params.date_filter !== "all" && params.date_filter !== undefined && params.date_filter !== "") {
-            query = query + " AND date = '" + params.date_filter + "'";
+            query = query + " AND Transactions.date = '" + params.date_filter + "'";
         }
     }
 

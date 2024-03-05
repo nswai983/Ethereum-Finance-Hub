@@ -17,6 +17,8 @@
     
         * https://waelyasmina.medium.com/a-guide-into-using-handlebars-with-your-express-js-application-22b944443b65
         * https://www.youtube.com/watch?v=HxJzZ7fmUDQ
+        * https://stackoverflow.com/questions/18580495/format-a-date-from-inside-a-handlebars-template-in-meteor
+        * https://stackoverflow.com/questions/41764373/how-to-register-custom-handlebars-helpers
 
 */
 
@@ -34,6 +36,21 @@ let app = express();
 
 //Loads the handlebars module
 let handlebars = require('express-handlebars');
+// let hbs = require("hbs");
+
+var hbs = handlebars.create({});
+
+// Deprecated since version 0.8.0 
+hbs.handlebars.registerHelper("formatDate", function(ts) {
+  // Format date to be inserted
+  let d = new Date(ts * 1000);
+  let year = d.getFullYear().toString();
+  let month = d.getMonth() + 1;
+  month = month.toString();
+  let day = d.getDate().toString();
+  let date = year + "-" + month + "-" + day;
+  return date;
+});
 
 //Sets our app to use the handlebars engine
 app.set('view engine', 'handlebars');
@@ -42,6 +59,9 @@ app.set('view engine', 'handlebars');
 app.engine('handlebars', handlebars.engine({
   layoutsDir: `${__dirname}/views/layouts`
 }));
+
+// Register dateFormat helper
+// hbs.registerHelper('dateFormat', require('handlebars-dateformat'));
 
 // Set up abaility to process cookies and body responses
 app.use(express.static('public'));
