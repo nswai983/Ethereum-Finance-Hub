@@ -326,7 +326,7 @@ async function getTransactions(wallet, transactionType) {
                 valueDivisor = 1000000000000000000;
                 break;
             case "ERC20":
-                valueDivisor = tsxArray[i].tokenDecimal ** 10;
+                valueDivisor = 10 ** tsxArray[i].tokenDecimal;
                 break;
             case "ERC721":
                 valueDivisor = 1;
