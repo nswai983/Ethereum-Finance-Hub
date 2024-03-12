@@ -28,6 +28,7 @@
 
     https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
 
+    https://www.w3schools.com/js/js_arithmetic.asp
 
 */
 
@@ -282,7 +283,7 @@ async function getTransactions(wallet, transactionType) {
         // Get new transactions
         let newTsx;
 
-        switch(transactionType){
+        switch (transactionType) {
             case "Normal":
                 newTsx = await etherscan.getAccountNormalTransactions(wallet, pageNum);
                 break;
@@ -303,7 +304,7 @@ async function getTransactions(wallet, transactionType) {
         }
 
         // Add new transactions to array
-        tsxArray = tsxArray.concat(newTsx);
+        tsxArray.concat(newTsx);
 
         // See if we have reached the end of the transactions. If not, add 1 to page number
         if (newTsx.length < 1000) {
@@ -313,29 +314,30 @@ async function getTransactions(wallet, transactionType) {
         }
     }
 
-    // Set Value Divisor
-    switch(transactionType){
-        case "Normal":
-            valueDivisor = 1000000000000000000;
-            break;
-        case "Internal":
-            valueDivisor = 1000000000000000000;
-            break;
-        case "ERC20":
-            valueDivisor = 1000000000000000000;
-            break;
-        case "ERC721":
-            valueDivisor = 1;
-            break;
-        case "ERC1155":
-            valueDivisor = 1;
-            break;
-        default:
-            throw new Error("Transaction type not found.")
-    }
-
     // Add each normal transaction to the database
     for (let i = 0; i < tsxArray.length; i++) {
+
+        // Set Value Divisor
+        switch (transactionType) {
+            case "Normal":
+                valueDivisor = 1000000000000000000;
+                break;
+            case "Internal":
+                valueDivisor = 1000000000000000000;
+                break;
+            case "ERC20":
+                valueDivisor = tsxArray[i].tokenDecimal ** 10;
+                break;
+            case "ERC721":
+                valueDivisor = 1;
+                break;
+            case "ERC1155":
+                valueDivisor = 1;
+                break;
+            default:
+                throw new Error("Transaction type not found.")
+        }
+
 
         // If transaction has issues, continue
         if (tsxArray[i] === undefined) {
@@ -356,13 +358,13 @@ async function getTransactions(wallet, transactionType) {
                     idToken = await queries.getTokenId("ETH");
 
                     if (idToken === undefined) {
-                    // Insert ETH token into database
-                    await queries.insertToken("ETH", "ETH", "Ethereum");
+                        // Insert ETH token into database
+                        await queries.insertToken("ETH", "ETH", "Ethereum");
 
-                    idToken = await queries.getTokenId("ETH");
+                        idToken = await queries.getTokenId("ETH");
                     }
                 } else {
-                    console.log(tsxArray[i].contractAddress);
+                    // console.log(tsxArray[i].contractAddress);
                     // Get token info from etherscan
                     let tokenInfo = await cryptoCompare.getTokenInfo(tsxArray[i].contractAddress);
 
@@ -385,7 +387,7 @@ async function getTransactions(wallet, transactionType) {
             if (transactionData) {
                 // insert current transaction line into database
                 await queries.insertTransactionLine(transactionData.idTransaction, idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
-                
+
             } else {
                 // Format date to be inserted
                 let timestamp = Number(tsxArray[i]["timeStamp"]);
@@ -395,17 +397,21 @@ async function getTransactions(wallet, transactionType) {
                 month = month.toString();
                 let day = d.getDate().toString();
                 let date = year + "-" + month + "-" + day;
-                
+
                 // Since transaction does not yet exist in database, insert into database
                 await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet, timestamp);
 
                 // Get transaction ID now that it has been created
                 transactionData = await queries.getTransaction(tsxArray[i].hash);
-                
+
                 // insert current transaction line into database
                 await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
             }
-            
+
+        }
+
+        if (tsxArray[i].hash === "0xb873353437a0be2f2600b1b1d276bb872781d7d50f8dda6ab361487c35d92192") {
+            console.log(tsxArray[i]);
         }
     }
 }
@@ -430,7 +436,7 @@ async function getPrices(tokenSymbol, contractAddress) {
     for (i in timestamps) {
 
         // console.log(timestamps[i]["timestamp"]);
-        
+
         let price = await cryptoCompare.getTokenPrice(tokenSymbol, timestamps[i]["timestamp"])
         // console.log(price);
 

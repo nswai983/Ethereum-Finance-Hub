@@ -15,16 +15,6 @@
 
 var mysql = require('mysql2');
 
-// var con = mysql.createConnection({
-//   MYSQLDATABASE:        "railway",
-//   MYSQLHOST:            "roundhouse.proxy.rlwy.net",
-//   MYSQLUSER:            "root",
-//   MYSQLPORT:            "46480",
-//   MYSQLPASSWORD:        "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E",
-//   MYSQL_DATABASE:       "railway",
-//   MYSQL_ROOT_PASSWORD:  "eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E"
-// });
-
 let db = mysql.createConnection(`mysql://root:eFFDdBCBD1cdd6EaBd6D3H56AFC-GC1E@roundhouse.proxy.rlwy.net:46480/railway`);
 
 // Export router so that it can be used by app.js

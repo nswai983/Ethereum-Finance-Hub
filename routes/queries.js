@@ -423,7 +423,7 @@ async function getTransactionTimestampsByToken(contractAddress) {
     let query = "SELECT timestamp FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet"
     query = query + ` WHERE contractAddress = '${contractAddress}' GROUP BY timestamp ORDER BY timestamp ASC;`
 
-    console.log(query);
+    // console.log(query);
 
     // Execute query
     db.query(query, (err, result) => {
@@ -436,72 +436,6 @@ async function getTransactionTimestampsByToken(contractAddress) {
     });
   });
 }
-
-
-/*
-  QUERY: GET TRANSACTIONS LIST
-
-  SELECT walletHash, tsxHash, date, tokenName, amount, price * (SELECT amount FROM Prices
-    WHERE Prices.token = TransactionLines.token AND Prices.date = Transactions.date) AS value, from, to 
-  FROM TransactionLines
-  INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction
-  INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet
-  INNER JOIN Tokens ON TransactionsLines.token = Tokens.idToken
-
-*/
-
-/*
-  QUERY: GET SPECIFIC TRANSACTION
-
-  SELECT walletHash, tsxHash, date, tokenName, amount, price * (SELECT amount FROM Prices
-    WHERE Prices.token = TransactionLines.token AND Prices.date = Transactions.date) AS value, from, to 
-  FROM TransactionLines
-  INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction
-  INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet
-  INNER JOIN Tokens ON TransactionsLines.token = Tokens.idToken
-  WHERE tsxHash = [searched_tsx]
-
-*/
-
-/*
-  QUERY: GET TRANSACTIONS FROM WALLET
-
-  SELECT walletHash, tsxHash, date, tokenName, amount, price * (SELECT amount FROM Prices
-    WHERE Prices.token = TransactionLines.token AND Prices.date = Transactions.date) AS value, from, to 
-  FROM TransactionLines
-  INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction
-  INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet
-  INNER JOIN Tokens ON TransactionsLines.token = Tokens.idToken
-  WHERE walletHash = [filtered_wallet]
-
-*/
-
-/*
-  QUERY: GET TRANSACTIONS BY DATE
-
-  SELECT walletHash, tsxHash, date, tokenName, amount, price * (SELECT amount FROM Prices
-    WHERE Prices.token = TransactionLines.token AND Prices.date = Transactions.date) AS value, from, to 
-  FROM TransactionLines
-  INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction
-  INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet
-  INNER JOIN Tokens ON TransactionsLines.token = Tokens.idToken
-  WHERE date = [filtered_date]
-
-*/
-
-/*
-  QUERY: GET TRANSACTIONS BY TOKEN
-
-  SELECT walletHash, tsxHash, date, tokenName, amount, price * (SELECT amount FROM Prices
-    WHERE Prices.token = TransactionLines.token AND Prices.date = Transactions.date) AS value, from, to 
-  FROM TransactionLines
-  INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction
-  INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet
-  INNER JOIN Tokens ON TransactionsLines.token = Tokens.idToken
-  WHERE token = [filtered_token]
-
-*/
-
 
 // Export router so that it can be used by app.js
 module.exports = { getTransactionDates, getWalletBalance, getWalletsBalance, addWallets, 

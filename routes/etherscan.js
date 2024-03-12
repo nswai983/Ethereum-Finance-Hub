@@ -55,6 +55,7 @@ async function getAccountNormalTransactions(wallet, page) {
 
             // API call variable creation
             let API_CALL = API_URL + "?module=account&action=txlist&address=" + wallet + "&startblock=0&endblock=99999999&page=" + page + "&offset=1000&sort=asc&apikey=" + API_KEY;
+            console.log(API_CALL);
 
             // Perform API Call
             axios
