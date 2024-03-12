@@ -384,6 +384,8 @@ async function getTransactions(wallet, transactionType) {
 
             let transactionData = await queries.getTransaction(tsxArray[i].hash)[0];
 
+            console.log(transactionData);
+
             if (transactionData) {
                 // insert current transaction line into database
                 await queries.insertTransactionLine(transactionData.idTransaction, idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
