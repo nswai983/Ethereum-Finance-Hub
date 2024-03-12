@@ -351,6 +351,9 @@ async function deleteData() {
   });
 }
 
+/*
+  Helper function that allows a function to call an internal query
+*/
 async function internalQuery(query) {
 
   return new Promise((resolve) => {
@@ -371,7 +374,7 @@ async function getTransactions(params, walletArray) {
   return new Promise((resolve) => {
 
 
-    let query = "SELECT *, amount * price AS value FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet INNER JOIN Prices ON TransactionLines.token = Prices.token AND Transactions.date = Prices.date"
+    let query = "SELECT *, amount * price AS value, fee * price AS feeValue FROM TransactionLines INNER JOIN Transactions ON TransactionLines.transaction = Transactions.idTransaction INNER JOIN Tokens ON TransactionLines.token = Tokens.idToken INNER JOIN Wallets ON Transactions.wallet = Wallets.idWallet INNER JOIN Prices ON TransactionLines.token = Prices.token AND Transactions.date = Prices.date"
 
 
     if (params.tsxHashSearch_filter !== undefined && params.tsxHashSearch_filter !== "Search Transactions..." && params.tsxHashSearch_filter !== "") {

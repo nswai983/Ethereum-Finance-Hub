@@ -314,35 +314,35 @@ async function getTransactions(wallet, transactionType) {
         }
     }
 
+    console.log(tsxArray);
+
     // Add each normal transaction to the database
     for (let i = 0; i < tsxArray.length; i++) {
-
-        // Set Value Divisor
-        switch (transactionType) {
-            case "Normal":
-                valueDivisor = 1000000000000000000;
-                break;
-            case "Internal":
-                valueDivisor = 1000000000000000000;
-                break;
-            case "ERC20":
-                valueDivisor = 10 ** tsxArray[i].tokenDecimal;
-                break;
-            case "ERC721":
-                valueDivisor = 1;
-                break;
-            case "ERC1155":
-                valueDivisor = 1;
-                break;
-            default:
-                throw new Error("Transaction type not found.")
-        }
-
 
         // If transaction has issues, continue
         if (tsxArray[i] === undefined) {
             continue
         } else {
+            // Set Value Divisor
+            switch (transactionType) {
+                case "Normal":
+                    valueDivisor = 1000000000000000000;
+                    break;
+                case "Internal":
+                    valueDivisor = 1000000000000000000;
+                    break;
+                case "ERC20":
+                    valueDivisor = 10 ** tsxArray[i].tokenDecimal;
+                    break;
+                case "ERC721":
+                    valueDivisor = 1;
+                    break;
+                case "ERC1155":
+                    valueDivisor = 1;
+                    break;
+                default:
+                    throw new Error("Transaction type not found.")
+            }
 
             // Get wallet ID for transaction
             let idWallet = await queries.getWalletId(wallet);
@@ -364,8 +364,7 @@ async function getTransactions(wallet, transactionType) {
                         idToken = await queries.getTokenId("ETH");
                     }
                 } else {
-                    // console.log(tsxArray[i].contractAddress);
-                    // Get token info from etherscan
+                    // Get token info from cryptoCompare
                     let tokenInfo = await cryptoCompare.getTokenInfo(tsxArray[i].contractAddress);
 
                     // If token info was not found, replace with contract address
@@ -382,9 +381,12 @@ async function getTransactions(wallet, transactionType) {
                 }
             }
 
-            let transactionData = await queries.getTransaction(tsxArray[i].hash)[0];
+            let transactionData = await queries.getTransaction(tsxArray[i].hash);
 
-            console.log(transactionData);
+            // console.log(transactionData);
+
+            
+            transactionData = transactionData[0];
 
             if (transactionData) {
                 // insert current transaction line into database
