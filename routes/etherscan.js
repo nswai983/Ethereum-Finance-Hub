@@ -75,14 +75,14 @@ async function getAccountNormalTransactions(wallet, page) {
     Returns a list of internal transactions for a given ethereum wallet. Processes by
     page number, as there are only 1000 records returned per page.
 */
-async function getAccountInternalTransactions(wallet) {
+async function getAccountInternalTransactions(wallet, page) {
 
     return new Promise((resolve) => {
 
         setTimeout(() => {
 
             // API call variable creation
-            let API_CALL = API_URL + "?module=account&action=txlistinternal&address=" + wallet + "&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=" + API_KEY;
+            let API_CALL = API_URL + "?module=account&action=txlistinternal&address=" + wallet + "&startblock=0&endblock=99999999&page=" + page + "&offset=10&sort=asc&apikey=" + API_KEY;
 
             // Perform API Call
             axios
@@ -102,14 +102,14 @@ async function getAccountInternalTransactions(wallet) {
     Returns a list of ERC20 transactions for a given ethereum wallet. Processes by
     page number, as there are only 1000 records returned per page.
 */
-async function getAccountERC20Transactions(wallet) {
+async function getAccountERC20Transactions(wallet, page) {
 
     return new Promise((resolve) => {
 
         setTimeout(() => {
 
             // API call variable creation
-            let API_CALL = API_URL + "?module=account&action=tokentx&address=" + wallet + "&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=" + API_KEY;
+            let API_CALL = API_URL + "?module=account&action=tokentx&address=" + wallet + "&startblock=0&endblock=99999999&page=" + page + "&offset=10&sort=asc&apikey=" + API_KEY;
 
             // Perform API Call
             axios
@@ -129,14 +129,14 @@ async function getAccountERC20Transactions(wallet) {
     Returns a list of ERC721 transactions for a given ethereum wallet. Processes by
     page number, as there are only 1000 records returned per page.
 */
-async function getAccountERC721Transactions(wallet) {
+async function getAccountERC721Transactions(wallet, page) {
 
     return new Promise((resolve) => {
 
         setTimeout(() => {
 
             // API call variable creation
-            let API_CALL = API_URL + "?module=account&action=tokennfttx&address=" + wallet + "&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=" + API_KEY;
+            let API_CALL = API_URL + "?module=account&action=tokennfttx&address=" + wallet + "&startblock=0&endblock=99999999&page=" + page + "&offset=10&sort=asc&apikey=" + API_KEY;
 
             // Perform API Call
             axios
@@ -156,14 +156,14 @@ async function getAccountERC721Transactions(wallet) {
     Returns a list of ERC1155 transactions for a given ethereum wallet. Processes by
     page number, as there are only 1000 records returned per page.
 */
-async function getAccountERC1155Transactions(wallet) {
+async function getAccountERC1155Transactions(wallet, page) {
 
     return new Promise((resolve) => {
 
         setTimeout(() => {
 
             // API call variable creation
-            let API_CALL = API_URL + "?module=account&action=token1155tx&address=" + wallet + "&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=" + API_KEY;
+            let API_CALL = API_URL + "?module=account&action=token1155tx&address=" + wallet + "&startblock=0&endblock=99999999&page=" + page + "&offset=10&sort=asc&apikey=" + API_KEY;
 
             // Perform API Call
             axios

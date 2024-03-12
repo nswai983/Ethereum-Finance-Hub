@@ -304,7 +304,7 @@ async function getTransactions(wallet, transactionType) {
         }
 
         // Add new transactions to array
-        tsxArray.concat(newTsx);
+        tsxArray = tsxArray.concat(newTsx);
 
         // See if we have reached the end of the transactions. If not, add 1 to page number
         if (newTsx.length < 1000) {
