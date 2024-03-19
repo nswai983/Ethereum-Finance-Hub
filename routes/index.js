@@ -450,7 +450,7 @@ async function getPrices(tokenSymbol, contractAddress) {
 
             if (price === "N/A") {
                 continue
-            } else {
+            } else if (price[tokenSymbol]["USD"]) {
                 // insert price
                 await queries.insertPrice(tokenID, date, price[tokenSymbol]["USD"]);
                 // console.log(`Price added for ${tokenSymbol} at on ${date}...`);
