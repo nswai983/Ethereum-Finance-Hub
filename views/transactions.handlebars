@@ -32,7 +32,7 @@
             </select>
         </td>
         <td style="padding: 5px">
-            <label for="tsxHash_filter">Transaction Hash: </label>
+            <label for="tsxHashSearch_filter">Transaction Hash: </label>
         </td>
         <td>
             <search>
@@ -48,6 +48,12 @@
 <br>
 
     <button type="submit" formaction="/transactions" formmethod="post">Refresh</button>
+<br>
+<br>
+    <button type="submit" formaction="/wallets" formmethod="post">See Wallets</button>
+    <br>
+    <br>
+    <button type="submit" formaction="/summary" formmethod="post">See Summary</button>
 
 <br>
 <br>
@@ -81,10 +87,4 @@
     {{/each}}
 </table>
 
-<br>
-<br>
-    <button type="submit" formaction="/wallets" formmethod="post">See Wallets</button>
-    <br>
-    <br>
-    <button type="submit" formaction="/summary" formmethod="post">See Summary</button>
 </form>

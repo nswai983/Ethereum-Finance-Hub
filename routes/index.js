@@ -55,6 +55,9 @@ router.get("/", async function (req, res) {
     // Reset wallet data in cookie
     res.clearCookie("walletData");
 
+    // Reset wallets added cookie
+    res.clearCookie("walletsAdded");
+
     // Clear all transactions
     await queries.deleteData();
 
@@ -69,6 +72,7 @@ router.post("/summary", async function (req, res) {
     // Collect wallet data
     let walletData = req.body.wallets;
     let walletArray = req.cookies["walletData"];
+    let walletsAdded = req.cookies["walletsAdded"];
 
     // Get wallet data if coming from index page
     if (walletArray === undefined) {
@@ -120,63 +124,67 @@ router.post("/summary", async function (req, res) {
         res.cookie("walletData", walletArray);
     }
 
-    // Get list of wallets in database
-    databaseWallets = await queries.getWallets();
-    databaseWalletsArray = [];
-    for (let i = 0; i < databaseWallets.length; i++) {
-        databaseWalletsArray.push(databaseWallets[i]["walletHash"]);
-    }
+    if (walletsAdded === undefined) {
 
-    // Request wallet balance data from Etherscan API
-    for (let i = 0; i < walletArray.length; i++) {
-
-        // Check if wallet is in database; add wallet to database if not found
-        if (!databaseWalletsArray.includes(walletArray[i])) {
-            // Add wallets to database
-            await queries.addWallet(walletArray[i]);
-            console.log("Wallet added to database: " + walletArray[i]);
+        // Get list of wallets in database
+        databaseWallets = await queries.getWallets();
+        databaseWalletsArray = [];
+        for (let i = 0; i < databaseWallets.length; i++) {
+            databaseWalletsArray.push(databaseWallets[i]["walletHash"]);
         }
 
-        console.log("Loading transactions into database for wallet " + walletArray[i] + "...");
-        // Get normal transactions loaded into database
-        await getTransactions(walletArray[i], "Normal");
-        console.log("Normal transactions loaded for wallet: " + walletArray[i]);
+        // Request wallet balance data from Etherscan API
+        for (let i = 0; i < walletArray.length; i++) {
 
-        // Get internal transactions loaded into database
-        await getTransactions(walletArray[i], "Internal");
-        console.log("Internal transactions loaded for wallet: " + walletArray[i]);
+            // Check if wallet is in database; add wallet to database if not found
+            if (!databaseWalletsArray.includes(walletArray[i])) {
+                // Add wallets to database
+                await queries.addWallet(walletArray[i]);
+                console.log("Wallet added to database: " + walletArray[i]);
+            }
 
-        // Get ERC20 transactions loaded into database
-        await getTransactions(walletArray[i], "ERC20");
-        console.log("ERC20 transactions loaded for wallet: " + walletArray[i]);
+            console.log("Loading transactions into database for wallet " + walletArray[i] + "...");
+            // Get normal transactions loaded into database
+            await getTransactions(walletArray[i], "Normal");
+            console.log("Normal transactions loaded for wallet: " + walletArray[i]);
 
-        // Get ERC721 transactions loaded into database
-        await getTransactions(walletArray[i], "ERC721");
-        console.log("ERC721 transactions loaded for wallet: " + walletArray[i]);
+            // Get internal transactions loaded into database
+            await getTransactions(walletArray[i], "Internal");
+            console.log("Internal transactions loaded for wallet: " + walletArray[i]);
 
-        // Get ERC1155 transactions loaded into database
-        await getTransactions(walletArray[i], "ERC1155");
-        console.log("ERC1155 transactions loaded for wallet: " + walletArray[i]);
-    }
+            // Get ERC20 transactions loaded into database
+            await getTransactions(walletArray[i], "ERC20");
+            console.log("ERC20 transactions loaded for wallet: " + walletArray[i]);
 
-    // Get pricing data from CrypoCompare API
-    let tokenArray = await queries.getTokenContractAddresses();
-    console.log(tokenArray);
-    for (let i = 0; i < tokenArray.length; i++) {
-        if (tokenArray[i]["tokenName"] && tokenArray[i]["tokenName"].length !== 42) {
-            await getPrices(tokenArray[i]["tokenName"], tokenArray[i]["contractAddress"]);
+            // Get ERC721 transactions loaded into database
+            await getTransactions(walletArray[i], "ERC721");
+            console.log("ERC721 transactions loaded for wallet: " + walletArray[i]);
+
+            // Get ERC1155 transactions loaded into database
+            await getTransactions(walletArray[i], "ERC1155");
+            console.log("ERC1155 transactions loaded for wallet: " + walletArray[i]);
         }
-    }
 
+        // Get pricing data from CrypoCompare API
+        let tokenArray = await queries.getTokenContractAddresses();
+        // console.log(tokenArray);
+        for (let i = 0; i < tokenArray.length; i++) {
+            if (tokenArray[i]["tokenName"] && tokenArray[i]["tokenName"].length !== 42) {
+                await getPrices(tokenArray[i]["tokenName"], tokenArray[i]["contractAddress"]);
+            }
+        }
+
+        // Set up cookie stating that wallets have been added
+        res.cookie("walletsAdded", true);
+    }
 
     // Get wallet(s) balance / total value
     let totalValue = 0;
-
-    if (walletArray.length == 1) {
-        totalValue = await queries.getWalletBalance(walletArray[0]);
-    } else {
-        totalValue = await queries.getWalletsBalance(walletArray);
-    }
+    let inflow = await queries.getTotalValue(walletArray, 'I');
+    let outflow = await queries.getTotalValue(walletArray, 'O')
+    let fees = await queries.getTotalValue(walletArray, 'O');
+    console.log(`Inflow: ${inflow["totalValue"]}, Outflow: ${outflow["totalValue"]}, Fees: ${fees["feeValue"]}`)
+    totalValue = Number(inflow["totalValue"]) - Number(outflow["totalValue"]) - Number(fees["feeValue"]);
 
     //Serves the body of the page aka "summary.handlebars" to the container //aka "index.handlebars"
     res.render('summary', { layout: 'index', totalValue: totalValue, wallets: walletArray });
@@ -189,28 +197,32 @@ router.post("/summary", async function (req, res) {
 router.post("/wallets", async function (req, res) {
 
     // Collect wallet data
-    let walletArray = req.cookies["walletData"]
+    let walletArray = req.cookies["walletData"];
 
-    // Check wallet data; throw error if issues found
+    // Get params
+    let params = req.body;
 
-    // Request wallet balance data from Etherscan API
+    // Get first wallet value
+    let walletValueArray = [walletArray[0]];
 
-    // Get pricing data from CrypoCompare API
+    // Set to filtered wallet, if exists
+    if (params.wallet_filter && params.wallet_filter !== 'all') {
+        walletValueArray = [params.wallet_filter];
+    }
 
-    // Display wallets page with relevant data
+    console.log(walletValueArray);
 
-    let query = "SELECT SUM(value) FROM walletBalances INNER JOIN Wallets on walletBalances.wallet = Wallets.idWallet WHERE walletHash = '" + walletArray[0] + "';"
+    // Get wallet(s) balance / total value
+    let totalValue = 0;
+    let inflow = await queries.getTotalValue(walletValueArray, 'I');
+    let outflow = await queries.getTotalValue(walletValueArray, 'O')
+    let fees = await queries.getTotalValue(walletValueArray, 'O');
+    console.log(`Inflow: ${inflow["totalValue"]}, Outflow: ${outflow["totalValue"]}, Fees: ${fees["feeValue"]}`)
+    totalValue = Number(inflow["totalValue"]) - Number(outflow["totalValue"]) - Number(fees["feeValue"]);
 
-    database.query(query, (err, result) => {
-        if (err) {
-            throw err;
-        } else {
-
-            // Render wallets page
-            //Serves the body of the page aka "wallets.handlebars" to the container //aka "index.handlebars"
-            res.render('wallets', { layout: 'index', walletValue: result[0]["SUM(value)"], wallets: walletArray });
-        }
-    });
+    // Render wallets page
+    //Serves the body of the page aka "wallets.handlebars" to the container //aka "index.handlebars"
+    res.render('wallets', { layout: 'index', walletValue: totalValue, wallets: walletArray });
 });
 
 /*
@@ -243,17 +255,6 @@ router.post("/transactions", async function (req, res) {
         dateStrings.push(year + "-" + month + "-" + day);
     }
 
-
-    // Check wallet data; throw error if issues found
-
-    // Request wallet balance data from Etherscan API
-
-    // Get pricing data from CrypoCompare API
-
-    // Display summary page with relevant data
-
-
-
     // Get transactions
     let transactionData = await queries.getTransactions(req.body, walletArray);
 
@@ -264,7 +265,7 @@ router.post("/transactions", async function (req, res) {
 
 
 /*
-    HELPER FUNCTIONS
+    ------------------------------------------------- HELPER FUNCTIONS -------------------------------------------------
 */
 
 /*
@@ -313,8 +314,6 @@ async function getTransactions(wallet, transactionType) {
             pageNum++;
         }
     }
-
-    console.log(tsxArray);
 
     // Add each normal transaction to the database
     for (let i = 0; i < tsxArray.length; i++) {
@@ -381,16 +380,21 @@ async function getTransactions(wallet, transactionType) {
                 }
             }
 
-            let transactionData = await queries.getTransaction(tsxArray[i].hash);
+            // Determine transaction line direction
+            let direction = 'N'; // Set as no direction by default
+            if (tsxArray[i].to === wallet.toLowerCase()) {
+                direction = 'I'; // Set direction as inflow
+            }  
+            else if (tsxArray[i].from === wallet.toLowerCase()) {
+                direction = 'O'; // Set direction as outflow
+            }
 
-            // console.log(transactionData);
-
-            
+            let transactionData = await queries.getTransaction(tsxArray[i].hash);            
             transactionData = transactionData[0];
 
             if (transactionData) {
                 // insert current transaction line into database
-                await queries.insertTransactionLine(transactionData.idTransaction, idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
+                await queries.insertTransactionLine(transactionData.idTransaction, idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, direction, tsxArray[i].to, tsxArray[i].from); // to update for inflow/outflow
 
             } else {
                 // Format date to be inserted
@@ -403,19 +407,15 @@ async function getTransactions(wallet, transactionType) {
                 let date = year + "-" + month + "-" + day;
 
                 // Since transaction does not yet exist in database, insert into database
-                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].to, tsxArray[i].from, tsxArray[i].gasUsed / valueDivisor, idWallet, timestamp);
+                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].gasUsed / valueDivisor, idWallet, timestamp);
 
                 // Get transaction ID now that it has been created
                 transactionData = await queries.getTransaction(tsxArray[i].hash);
 
                 // insert current transaction line into database
-                await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, 0); // to update for inflow/outflow
+                await queries.insertTransactionLine(transactionData[0]["idTransaction"], idToken, (tsxArray[i].value || tsxArray[i].tokenValue) / valueDivisor, direction, tsxArray[i].to, tsxArray[i].from); // to update for inflow/outflow
             }
 
-        }
-
-        if (tsxArray[i].hash === "0xb873353437a0be2f2600b1b1d276bb872781d7d50f8dda6ab361487c35d92192") {
-            console.log(tsxArray[i]);
         }
     }
 }
@@ -429,40 +429,37 @@ async function getPrices(tokenSymbol, contractAddress) {
 
     // Get earliest transaction date for token
     let timestamps = await queries.getTransactionTimestampsByToken(contractAddress);
-    let earliestTimestamp;
-    let latestTimestamp;
-    if (timestamps) {
-        earliestTimestamp = timestamps[0]["timestamp"];
-        latestTimestamp = timestamps[timestamps.length - 1]["timestamp"];
-    }
 
     // Get price for each timestamp and add to database
     for (i in timestamps) {
 
-        // console.log(timestamps[i]["timestamp"]);
+        // Format date to be inserted
+        let timestamp = Number(timestamps[i]["timestamp"]);
+        let d = new Date(timestamp * 1000);
+        let year = d.getFullYear().toString();
+        let month = d.getMonth() + 1;
+        month = month.toString();
+        let day = d.getDate().toString();
+        let date = year + "-" + month + "-" + day;
 
-        let price = await cryptoCompare.getTokenPrice(tokenSymbol, timestamps[i]["timestamp"])
-        // console.log(price);
+        // Check that price does not already exist in database
+        let prices = await queries.getPrice(tokenID, date)
+        if (prices[0] === undefined) {
+            // Get price from CryptoCompare
+            let price = await cryptoCompare.getTokenPrice(tokenSymbol, timestamps[i]["timestamp"])
 
-        if (price === "N/A") {
-            continue
-        } else {
-            // Format date to be inserted
-            let timestamp = Number(timestamps[i]["timestamp"]);
-            let d = new Date(timestamp * 1000);
-            let year = d.getFullYear().toString();
-            let month = d.getMonth() + 1;
-            month = month.toString();
-            let day = d.getDate().toString();
-            let date = year + "-" + month + "-" + day;
+            if (price === "N/A") {
+                continue
+            } else {
+                // insert price
+                await queries.insertPrice(tokenID, date, price[tokenSymbol]["USD"]);
+                // console.log(`Price added for ${tokenSymbol} at on ${date}...`);
+            }
 
-            await queries.insertPrice(tokenID, date, price[tokenSymbol]["USD"]);
         }
-    }
 
-    // console.log(timestamps);
-    // console.log(earliestTimestamp);
-    // console.log(latestTimestamp);
+
+    }
 }
 
 // Export router so that it can be used by app.js

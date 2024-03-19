@@ -1,19 +1,29 @@
 <h1>Ethereum Finance Hub</h1>
 <p>Wallets view</p>
 
-<p>Total value: {{walletValue}}</p>
+<form>
+<p>Total value: ${{walletValue}}</p>
 
-<label for="wallets">Filter by: </label>
-<select name="wallets" id="wallets">
+<table>
+<label for="wallet_filter">Filter by: </label>
+<select name="wallet_filter" id="wallet_filter">
     {{#each wallets}}
     <option value={{this}}>{{this}}</option>
     {{/each}}
 </select>
 
+</table>
+
+<br>
+
+    <button type="submit" formaction="/wallets" formmethod="post">Refresh</button>
+
 <br>
 <br>
 
-<form>
+<br>
+<br>
+
     <button type="submit" formaction="/transactions" formmethod="post">See Transactions</button>
     <br>
     <br>
