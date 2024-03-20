@@ -2,27 +2,27 @@
 <p>Wallets view</p>
 
 <form>
-<p>Total value: ${{walletValue}}</p>
+    <p>Total value: ${{formatAmount walletValue}}</p>
 
-<table>
-<label for="wallet_filter">Filter by: </label>
-<select name="wallet_filter" id="wallet_filter">
-    {{#each wallets}}
-    <option value={{this}}>{{this}}</option>
-    {{/each}}
-</select>
+    <table>
+        <label for="wallet_filter">Filter by: </label>
+        <select name="wallet_filter" id="wallet_filter">
+            {{#each wallets}}
+            <option value={{this}}>{{this}}</option>
+            {{/each}}
+        </select>
 
-</table>
+    </table>
 
-<br>
+    <br>
 
     <button type="submit" formaction="/wallets" formmethod="post">Refresh</button>
 
-<br>
-<br>
+    <br>
+    <br>
 
-<br>
-<br>
+    <br>
+    <br>
 
     <button type="submit" formaction="/transactions" formmethod="post">See Transactions</button>
     <br>

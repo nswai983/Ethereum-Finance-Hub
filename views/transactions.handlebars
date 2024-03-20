@@ -2,89 +2,90 @@
 <p>Transactions View</p>
 
 <form>
-<table>
-    <tr>
-        <td style="padding: 5px">
-            <label for="wallet_filter">Wallet: </label>
-            <select name="wallet_filter" id="wallet_filter">
-                <option value="all">All</option>
-                {{#each wallets}}
-                <option value={{this}} >{{this}}</option>
-                {{/each}}
-            </select>
-        </td>
-        <td style="padding: 5px">
-            <label for="token_filter">Token: </label>
-            <select name="token_filter" id="token_filter">
-                <option value="all">All</option>
-                {{#each tokens}}
-                <option value={{this.tokenName}} >{{this.tokenName}}</option>
-                {{/each}}
-            </select>
-        </td>
-        <td style="padding: 5px">
-            <label for="date_filter">Date: </label>
-            <select name="date_filter" id="date_filter">
-                <option value="all">All</option>
-                {{#each dates}}
-                <option value={{this}}>{{this}}</option>
-                {{/each}}
-            </select>
-        </td>
-        <td style="padding: 5px">
-            <label for="tsxHashSearch_filter">Transaction Hash: </label>
-        </td>
-        <td>
-            <search>
-                <form>
-                    <input name="tsxHashSearch_filter" id="tsxHashSearch_filter" placeholder="Search Transactions...">
-                </form>
-            </search>
-            </select>
-        </td>
-    </tr>
-</table>
+    <table>
+        <tr>
+            <td style="padding: 5px">
+                <label for="wallet_filter">Wallet: </label>
+                <select name="wallet_filter" id="wallet_filter">
+                    <option value="all">All</option>
+                    {{#each wallets}}
+                    <option value={{this}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </td>
+            <td style="padding: 5px">
+                <label for="token_filter">Token: </label>
+                <select name="token_filter" id="token_filter">
+                    <option value="all">All</option>
+                    {{#each tokens}}
+                    <option value={{this.tokenName}}>{{this.tokenName}}</option>
+                    {{/each}}
+                </select>
+            </td>
+            <td style="padding: 5px">
+                <label for="date_filter">Date: </label>
+                <select name="date_filter" id="date_filter">
+                    <option value="all">All</option>
+                    {{#each dates}}
+                    <option value={{this}}>{{this}}</option>
+                    {{/each}}
+                </select>
+            </td>
+            <td style="padding: 5px">
+                <label for="tsxHashSearch_filter">Transaction Hash: </label>
+            </td>
+            <td>
+                <search>
+                    <form>
+                        <input name="tsxHashSearch_filter" id="tsxHashSearch_filter"
+                            placeholder="Search Transactions...">
+                    </form>
+                </search>
+                </select>
+            </td>
+        </tr>
+    </table>
 
-<br>
+    <br>
 
     <button type="submit" formaction="/transactions" formmethod="post">Refresh</button>
-<br>
-<br>
+    <br>
+    <br>
     <button type="submit" formaction="/wallets" formmethod="post">See Wallets</button>
     <br>
     <br>
     <button type="submit" formaction="/summary" formmethod="post">See Summary</button>
 
-<br>
-<br>
+    <br>
+    <br>
 
-<table style="width:100%; ; border:1px solid black; text-align:left;">
-    <tr style="border:1px solid black; text-align:left"> 
-        <th style="border:1px solid black; text-align:left">wallet</th>
-        <th style="border:1px solid black; text-align:left">Transaction Hash</th>
-        <th style="border:1px solid black; text-align:left">Date</th>
-        <th style="border:1px solid black; text-align:left">Token</th>
-        <th style="border:1px solid black; text-align:left">Amount</th>
-        <th style="border:1px solid black; text-align:left">Value</th>
-        <th style="border:1px solid black; text-align:left">fee</th>
-        <th style="border:1px solid black; text-align:left">from</th>
-        <th style="border:1px solid black; text-align:left">to</th>
-    </tr>
-    {{#each transactions}}
-                
-    <tr style="border:1px solid black; text-align:left">
-        
-        <td style="border:1px solid black; text-align:left">{{this.walletHash}}</td>
-        <td style="border:1px solid black; text-align:left">{{this.tsxHash}}</td>
-        <td style="border:1px solid black; text-align:left">{{formatDate this.timestamp}}</td>
-        <td style="border:1px solid black; text-align:left">{{this.tokenName}}</td>
-        <td style="border:1px solid black; text-align:left">{{this.amount}}</td>
-        <td style="border:1px solid black; text-align:left">${{this.value}}</td>
-        <td style="border:1px solid black; text-align:left">${{this.feeValue}}</td>
-        <td style="border:1px solid black; text-align:left">{{this.from}}</td>
-        <td style="border:1px solid black; text-align:left">{{this.to}}</td>
-    </tr>
-    {{/each}}
-</table>
+    <table style="width:100%; ; border:1px solid black; text-align:left;">
+        <tr style="border:1px solid black; text-align:left">
+            <th style="border:1px solid black; text-align:left">wallet</th>
+            <th style="border:1px solid black; text-align:left">Transaction Hash</th>
+            <th style="border:1px solid black; text-align:left">Date</th>
+            <th style="border:1px solid black; text-align:left">Token</th>
+            <th style="border:1px solid black; text-align:left">Amount</th>
+            <th style="border:1px solid black; text-align:left">Value</th>
+            <th style="border:1px solid black; text-align:left">fee</th>
+            <th style="border:1px solid black; text-align:left">from</th>
+            <th style="border:1px solid black; text-align:left">to</th>
+        </tr>
+        {{#each transactions}}
+
+        <tr style="border:1px solid black; text-align:left">
+
+            <td style="border:1px solid black; text-align:left">{{this.walletHash}}</td>
+            <td style="border:1px solid black; text-align:left">{{this.tsxHash}}</td>
+            <td style="border:1px solid black; text-align:left">{{formatDate this.timestamp}}</td>
+            <td style="border:1px solid black; text-align:left">{{this.tokenName}}</td>
+            <td style="border:1px solid black; text-align:left">{{formatAmount this.amount}}</td>
+            <td style="border:1px solid black; text-align:left">${{formatAmount this.value}}</td>
+            <td style="border:1px solid black; text-align:left">${{formatAmount this.feeValue}}</td>
+            <td style="border:1px solid black; text-align:left">{{this.from}}</td>
+            <td style="border:1px solid black; text-align:left">{{this.to}}</td>
+        </tr>
+        {{/each}}
+    </table>
 
 </form>

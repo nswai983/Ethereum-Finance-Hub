@@ -27,7 +27,7 @@ async function getTokenInfo(contractaddress) {
 
             // API call variable creation
             let API_CALL = API_URL_DATA + "onchain/v1/data/by/address?address=" + contractaddress + "&chain_symbol=ETH&api_key=" + API_KEY;
-            
+
             // Perform API Call
             axios
                 .get(API_CALL)
@@ -51,11 +51,16 @@ async function getTokenPrice(tokenSymbol, timestamp) {
 
             // API call variable creation
             let API_CALL = API_URL_PRICE + "data/pricehistorical?fsym=" + tokenSymbol + "&tsyms=USD&ts=" + timestamp + "&api_key=" + API_KEY;
-            
+
             // Perform API Call
             axios
                 .get(API_CALL)
                 .then(response => {
+
+                    if (response.data["Response"] === 'Error') {
+                        resolve("N/A");
+                    }
+
                     resolve(response.data);
                 })
                 .catch(error => {

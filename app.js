@@ -19,6 +19,7 @@
         * https://www.youtube.com/watch?v=HxJzZ7fmUDQ
         * https://stackoverflow.com/questions/18580495/format-a-date-from-inside-a-handlebars-template-in-meteor
         * https://stackoverflow.com/questions/41764373/how-to-register-custom-handlebars-helpers
+        * https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
 
 */
 
@@ -41,7 +42,7 @@ let handlebars = require('express-handlebars');
 var hbs = handlebars.create({});
 
 // Deprecated since version 0.8.0 
-hbs.handlebars.registerHelper("formatDate", function(ts) {
+hbs.handlebars.registerHelper("formatDate", function (ts) {
   // Format date to be inserted
   let d = new Date(ts * 1000);
   let year = d.getFullYear().toString();
@@ -50,6 +51,17 @@ hbs.handlebars.registerHelper("formatDate", function(ts) {
   let day = d.getDate().toString();
   let date = year + "-" + month + "-" + day;
   return date;
+});
+
+// Helper method to format amounts
+hbs.handlebars.registerHelper("formatAmount", function (amount) {
+  // Format Amount and round to 2 digits
+  if (amount !== undefined) {
+    amount = Math.round(amount * 100) / 100
+  } else {
+    amount = 0.00
+  }
+  return amount;
 });
 
 //Sets our app to use the handlebars engine

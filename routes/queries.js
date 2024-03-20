@@ -312,8 +312,6 @@ async function insertTransaction(tsxHash, date, fee, wallet, timestamp) {
 
     let query = "INSERT INTO Transactions (`tsxHash`, `date`, `fee`, `wallet`, `timestamp` ) VALUES ('" + tsxHash + "', '" + date + "', '" + fee + "', '" + wallet + "', " + timestamp + ");"
 
-    // console.log(query);
-
     // Execute query
     db.query(query, (err, result) => {
       if (err) {

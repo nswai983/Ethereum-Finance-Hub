@@ -384,12 +384,12 @@ async function getTransactions(wallet, transactionType) {
             let direction = 'N'; // Set as no direction by default
             if (tsxArray[i].to === wallet.toLowerCase()) {
                 direction = 'I'; // Set direction as inflow
-            }  
+            }
             else if (tsxArray[i].from === wallet.toLowerCase()) {
                 direction = 'O'; // Set direction as outflow
             }
 
-            let transactionData = await queries.getTransaction(tsxArray[i].hash);            
+            let transactionData = await queries.getTransaction(tsxArray[i].hash);
             transactionData = transactionData[0];
 
             if (transactionData) {
@@ -407,7 +407,16 @@ async function getTransactions(wallet, transactionType) {
                 let date = year + "-" + month + "-" + day;
 
                 // Since transaction does not yet exist in database, insert into database
-                await queries.insertTransaction(tsxArray[i].hash, date, tsxArray[i].gasUsed / valueDivisor, idWallet, timestamp);
+                let gas = 0;
+
+                if (transactionType === "Normal") {
+                    let gasPrice = tsxArray[i].gasPrice;
+                    let gasUsed = tsxArray[i].gasUsed;
+                    gas = gasPrice * gasUsed / 1000000000000000000;
+                    console.log(`gas: ${gasUsed}; price: ${gasPrice}; total gas: ${gas}`)
+                }
+
+                await queries.insertTransaction(tsxArray[i].hash, date, gas, idWallet, timestamp);
 
                 // Get transaction ID now that it has been created
                 transactionData = await queries.getTransaction(tsxArray[i].hash);
@@ -447,6 +456,7 @@ async function getPrices(tokenSymbol, contractAddress) {
         if (prices[0] === undefined) {
             // Get price from CryptoCompare
             let price = await cryptoCompare.getTokenPrice(tokenSymbol, timestamps[i]["timestamp"])
+            console.log(price)
 
             if (price === "N/A") {
                 continue
