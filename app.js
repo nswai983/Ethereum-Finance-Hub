@@ -1,20 +1,16 @@
 /*
     This app.js file is based on a medium article describing how to build a simple web application. 
     I have modified the code given in the medium article to fit the purposes of my application.
-
     Source: https://medium.com/@guraycintir/simple-web-application-with-node-js-and-express-70f702b08498
 
     HTML web pages were rendered using the express.js guide to using template engines (linked below). 
-
     Source: https://expressjs.com/en/guide/using-template-engines.html
 
     The following resources were used to create the MySQL database:
-
         * For troubleshooting foreign key duplicate naming issue, the following resource was used:
           https://stackoverflow.com/questions/12994919/errno-121-duplicate-key-on-write-or-update
 
     The following resources were used to integrate Handlebars into the Node.js application
-    
         * https://waelyasmina.medium.com/a-guide-into-using-handlebars-with-your-express-js-application-22b944443b65
         * https://www.youtube.com/watch?v=HxJzZ7fmUDQ
         * https://stackoverflow.com/questions/18580495/format-a-date-from-inside-a-handlebars-template-in-meteor

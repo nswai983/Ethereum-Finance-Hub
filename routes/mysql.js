@@ -2,11 +2,10 @@
 
     The file contains the various sql statements used in the application.
 
-    Source: https://www.w3schools.com/nodejs/nodejs_mysql.asp
-
-    https://medium.com/@kelvinekrresa/mysql-client-does-not-support-authentication-protocol-6eed9a6e813e
-
-    https://www.freecodecamp.org/news/javascript-modules-explained-with-examples/
+    SourceS Referenced: 
+    * https://www.w3schools.com/nodejs/nodejs_mysql.asp
+    * https://medium.com/@kelvinekrresa/mysql-client-does-not-support-authentication-protocol-6eed9a6e813e
+    * https://www.freecodecamp.org/news/javascript-modules-explained-with-examples/
 
     Use of mysql2 package vs mysql came from an authentication issue with mysql package. Issue resolved via this article:
     https://github.com/strapi/strapi/issues/13774

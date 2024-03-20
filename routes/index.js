@@ -1,34 +1,27 @@
 /*
 
     HTML web pages were rendered using the express.js guide to using template engines (linked below). 
-
     Source: https://expressjs.com/en/guide/using-template-engines.html
 
     Express routes were based on learning found in the mozilla developer web docs.
-
     Source: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs/routes
 
     Mysql connections were based on:
-
     https://medium.com/@johnkolo/how-to-run-multiple-sql-queries-directly-from-an-sql-file-in-node-js-part-1-dce1e6dd2def
 
     For cookies:
-
     https://www.geeksforgeeks.org/http-cookies-in-node-js/#
 
     For variable passing with HTML:
-
     https://medium.com/swlh/read-html-form-data-using-get-and-post-method-in-node-js-8d2c7880adbf
 
     For date strings: https://stackoverflow.com/questions/45906215/insert-date-to-mysql-with-node
 
-    https://www.freecodecamp.org/news/how-to-convert-a-string-to-a-number-in-javascript/
-
-    https://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
-
-    https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
-
-    https://www.w3schools.com/js/js_arithmetic.asp
+    Other sources referenced:
+    * https://www.freecodecamp.org/news/how-to-convert-a-string-to-a-number-in-javascript/
+    * https://stackoverflow.com/questions/847185/convert-a-unix-timestamp-to-time-in-javascript
+    * https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
+    * https://www.w3schools.com/js/js_arithmetic.asp
 
 */
 

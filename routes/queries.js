@@ -2,23 +2,19 @@
 
     The file contains the various sql statements used in the application.
 
-    Source: https://www.w3schools.com/nodejs/nodejs_mysql.asp
+    Sources Referenced: 
+    
+    * https://www.w3schools.com/nodejs/nodejs_mysql.asp
+    * https://medium.com/@kelvinekrresa/mysql-client-does-not-support-authentication-protocol-6eed9a6e813e
+    * https://www.freecodecamp.org/news/javascript-modules-explained-with-examples/    
+    * https://medium.com/@johnkolo/how-to-run-multiple-sql-queries-directly-from-an-sql-file-in-node-js-part-1-dce1e6dd2def
+    * https://gist.github.com/TheoOkafor/1762e455b0e76c6764f0deabc08c8a77
+    * https://stackoverflow.com/questions/498197/mysql-how-to-join-tables-on-two-fields
+    * https://www.w3schools.com/mysql/mysql_join.asp#:~:text=MySQL%20Joining%20Tables,a%20related%20column%20between%20them.&text=Notice%20that%20the%20%22CustomerID%22%20column,in%20the%20%22Customers%22%20table.
 
-    https://medium.com/@kelvinekrresa/mysql-client-does-not-support-authentication-protocol-6eed9a6e813e
-
-    https://www.freecodecamp.org/news/javascript-modules-explained-with-examples/
 
     Use of mysql2 package vs mysql came from an authentication issue with mysql package. Issue resolved via this article:
     https://github.com/strapi/strapi/issues/13774
-
-    https://medium.com/@johnkolo/how-to-run-multiple-sql-queries-directly-from-an-sql-file-in-node-js-part-1-dce1e6dd2def
-
-    https://gist.github.com/TheoOkafor/1762e455b0e76c6764f0deabc08c8a77
-
-    https://stackoverflow.com/questions/498197/mysql-how-to-join-tables-on-two-fields
-
-    https://www.w3schools.com/mysql/mysql_join.asp#:~:text=MySQL%20Joining%20Tables,a%20related%20column%20between%20them.&text=Notice%20that%20the%20%22CustomerID%22%20column,in%20the%20%22Customers%22%20table.
-
 */
 
 // const { query } = require("express");
